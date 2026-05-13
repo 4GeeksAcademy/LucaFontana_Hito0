@@ -125,7 +125,8 @@
             <ul class="hidden md:flex items-center gap-8 text-sm font-medium text-gray-300" role="menubar">
                 <li role="none"><a href="#hero" class="hover:text-brand transition-colors duration-200 py-2 focus:outline-none focus:ring-2 focus:ring-brand rounded" role="menuitem">Inicio</a></li>
                 <li role="none"><a href="#ubicaciones" class="hover:text-brand transition-colors duration-200 py-2 focus:outline-none focus:ring-2 focus:ring-brand rounded" role="menuitem">Ubicaciones</a></li>
-                <li role="none"><a href="#" class="hover:text-brand transition-colors duration-200 py-2 focus:outline-none focus:ring-2 focus:ring-brand rounded" role="menuitem">Menú</a></li>
+                <li role="none"><a href="#platos" class="hover:text-brand transition-colors duration-200 py-2 focus:outline-none focus:ring-2 focus:ring-brand rounded" role="menuitem">Platos</a></li>
+                <li role="none"><a href="#resenas" class="hover:text-brand transition-colors duration-200 py-2 focus:outline-none focus:ring-2 focus:ring-brand rounded" role="menuitem">Reseñas</a></li>
                 <li role="none"><a href="#brasa-points" class="hover:text-brand transition-colors duration-200 py-2 focus:outline-none focus:ring-2 focus:ring-brand rounded" role="menuitem">Brasa Points</a></li>
                 <li role="none"><a href="#contacto" class="hover:text-brand transition-colors duration-200 py-2 focus:outline-none focus:ring-2 focus:ring-brand rounded" role="menuitem">Contacto</a></li>
             </ul>
@@ -146,7 +147,8 @@
             <ul class="flex flex-col gap-1 px-4 py-4 text-base font-medium text-gray-300">
                 <li><a href="#hero" class="block py-3 px-4 rounded-lg hover:bg-white/5 hover:text-brand transition-colors focus:outline-none focus:ring-2 focus:ring-brand" role="menuitem">Inicio</a></li>
                 <li><a href="#ubicaciones" class="block py-3 px-4 rounded-lg hover:bg-white/5 hover:text-brand transition-colors focus:outline-none focus:ring-2 focus:ring-brand" role="menuitem">Ubicaciones</a></li>
-                <li><a href="#" class="block py-3 px-4 rounded-lg hover:bg-white/5 hover:text-brand transition-colors focus:outline-none focus:ring-2 focus:ring-brand" role="menuitem">Menú</a></li>
+                <li><a href="#platos" class="block py-3 px-4 rounded-lg hover:bg-white/5 hover:text-brand transition-colors focus:outline-none focus:ring-2 focus:ring-brand" role="menuitem">Platos</a></li>
+                <li><a href="#resenas" class="block py-3 px-4 rounded-lg hover:bg-white/5 hover:text-brand transition-colors focus:outline-none focus:ring-2 focus:ring-brand" role="menuitem">Reseñas</a></li>
                 <li><a href="#brasa-points" class="block py-3 px-4 rounded-lg hover:bg-white/5 hover:text-brand transition-colors focus:outline-none focus:ring-2 focus:ring-brand" role="menuitem">Brasa Points</a></li>
                 <li><a href="#contacto" class="block py-3 px-4 rounded-lg hover:bg-white/5 hover:text-brand transition-colors focus:outline-none focus:ring-2 focus:ring-brand" role="menuitem">Contacto</a></li>
             </ul>
@@ -192,7 +194,7 @@
                     <!-- Image -->
                     <div class="fade-up order-2 lg:order-1">
                         <div class="relative rounded-2xl overflow-hidden shadow-2xl shadow-brand/10">
-                            <img src="https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80" alt="Carne asándose en parrilla con llamas y brasas" class="w-full h-72 md:h-96 object-cover" loading="lazy">
+                            <img src="https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80" alt="Plato típico de Brasaland con carne, papas y aderezos" class="w-full h-72 md:h-96 object-cover" loading="lazy">
                             <div class="absolute inset-0 bg-gradient-to-t from-dark/50 to-transparent"></div>
                         </div>
                     </div>
@@ -428,6 +430,183 @@
                             ¿Quieres hacer un pedido? Llama a tu ubicación favorita o visítanos directamente. ¡Pronto tendremos pedidos en línea!
                         </p>
                     </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== PLATOS FRECUENTES ==================== -->
+        <section id="platos" class="py-20 md:py-32 bg-dark" aria-labelledby="platos-title">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center fade-up">
+                    <span class="text-brand font-semibold text-sm uppercase tracking-widest">Nuestros favoritos</span>
+                    <h2 id="platos-title" class="mt-3 text-3xl sm:text-4xl md:text-5xl font-[Poppins] font-bold">
+                        Platos Frecuentes
+                    </h2>
+                    <p class="mt-4 text-gray-400 text-lg max-w-2xl mx-auto">Los platos más pedidos por nuestros clientes, preparados con la técnica y el sabor que nos caracterizan.</p>
+                </div>
+
+                <div class="mt-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <!-- Plato 1: Costillas Ahumadas al Carbón -->
+                    <article class="fade-up group bg-dark-card border border-white/5 rounded-2xl overflow-hidden hover:border-brand/30 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300" style="transition-delay: 0.1s" aria-label="Costillas Ahumadas al Carbón">
+                        <div class="relative overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80" alt="Costillas ahumadas al carbón con salsa barbacoa" class="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy">
+                            <div class="absolute top-3 right-3 bg-brand text-white text-xs font-bold px-3 py-1 rounded-full">Popular</div>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-lg font-bold font-[Poppins] group-hover:text-brand transition-colors duration-300">Costillas Ahumadas al Carbón</h3>
+                            <p class="mt-2 text-gray-400 text-sm">Costillas de cerdo ahumadas durante 6 horas con nuestra mezcla secreta de especias y glaseadas con salsa BBQ artesanal.</p>
+                            <div class="mt-4 flex items-center justify-between">
+                                <span class="text-brand font-bold text-lg">$45.000 COP</span>
+                                <span class="text-xs text-gray-500 bg-white/5 px-2 py-1 rounded-full">450g</span>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- Plato 2: Pechuga Brasaland Especial -->
+                    <article class="fade-up group bg-dark-card border border-white/5 rounded-2xl overflow-hidden hover:border-brand/30 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300" style="transition-delay: 0.2s" aria-label="Pechuga Brasaland Especial">
+                        <div class="relative overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1632778149955-e80f8ceca2e8?auto=format&fit=crop&w=600&q=80" alt="Pechuga de pollo a la brasa con vegetales asados" class="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy">
+                            <div class="absolute top-3 right-3 bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full">Saludable</div>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-lg font-bold font-[Poppins] group-hover:text-brand transition-colors duration-300">Pechuga Brasaland Especial</h3>
+                            <p class="mt-2 text-gray-400 text-sm">Pechuga de pollo marinada en hierbas frescas, asada a la brasa y acompañada de vegetales de temporada.</p>
+                            <div class="mt-4 flex items-center justify-between">
+                                <span class="text-brand font-bold text-lg">$32.000 COP</span>
+                                <span class="text-xs text-gray-500 bg-white/5 px-2 py-1 rounded-full">350g</span>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- Plato 3: Chorizo Criollo a la Brasa -->
+                    <article class="fade-up group bg-dark-card border border-white/5 rounded-2xl overflow-hidden hover:border-brand/30 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300" style="transition-delay: 0.3s" aria-label="Chorizo Criollo a la Brasa">
+                        <div class="relative overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=600&q=80" alt="Chorizo criollo a la brasa con arepa y guacamole" class="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy">
+                            <div class="absolute top-3 right-3 bg-amber-600 text-white text-xs font-bold px-3 py-1 rounded-full">Clásico</div>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-lg font-bold font-[Poppins] group-hover:text-brand transition-colors duration-300">Chorizo Criollo a la Brasa</h3>
+                            <p class="mt-2 text-gray-400 text-sm">Chorizo artesanal preparado con receta tradicional colombiana, servido con arepa de maíz y guacamole fresco.</p>
+                            <div class="mt-4 flex items-center justify-between">
+                                <span class="text-brand font-bold text-lg">$28.000 COP</span>
+                                <span class="text-xs text-gray-500 bg-white/5 px-2 py-1 rounded-full">300g</span>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- Plato 4: Lomo de Res Premium -->
+                    <article class="fade-up group bg-dark-card border border-white/5 rounded-2xl overflow-hidden hover:border-brand/30 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300" style="transition-delay: 0.4s" aria-label="Lomo de Res Premium">
+                        <div class="relative overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1558030006-450675393462?auto=format&fit=crop&w=600&q=80" alt="Lomo de res premium a la brasa con chimichurri" class="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy">
+                            <div class="absolute top-3 right-3 bg-brand text-white text-xs font-bold px-3 py-1 rounded-full">Premium</div>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-lg font-bold font-[Poppins] group-hover:text-brand transition-colors duration-300">Lomo de Res Premium</h3>
+                            <p class="mt-2 text-gray-400 text-sm">Corte premium de lomo fino, sellado a alta temperatura y bañado en chimichurri casero con papas al romero.</p>
+                            <div class="mt-4 flex items-center justify-between">
+                                <span class="text-brand font-bold text-lg">$58.000 COP</span>
+                                <span class="text-xs text-gray-500 bg-white/5 px-2 py-1 rounded-full">400g</span>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== RESEÑAS DE CLIENTES ==================== -->
+        <section id="resenas" class="py-20 md:py-32 bg-dark-surface" aria-labelledby="resenas-title">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center fade-up">
+                    <span class="text-brand font-semibold text-sm uppercase tracking-widest">Opiniones reales</span>
+                    <h2 id="resenas-title" class="mt-3 text-3xl sm:text-4xl md:text-5xl font-[Poppins] font-bold">
+                        Lo que dicen nuestros clientes
+                    </h2>
+                </div>
+
+                <div class="mt-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <!-- Reseña 1 -->
+                    <article class="fade-up group bg-dark-card border border-white/5 rounded-2xl p-6 hover:border-brand/30 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300" style="transition-delay: 0.1s" aria-label="Reseña de Carolina M.">
+                        <div class="flex items-center gap-1 mb-4" aria-label="Calificación: 5 de 5 estrellas">
+                            <svg class="w-5 h-5 text-brand" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                            <svg class="w-5 h-5 text-brand" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                            <svg class="w-5 h-5 text-brand" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                            <svg class="w-5 h-5 text-brand" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                            <svg class="w-5 h-5 text-brand" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        </div>
+                        <blockquote class="text-gray-300 text-sm leading-relaxed mb-4">
+                            "Las costillas ahumadas son increíbles. Llevo viniendo cada semana desde que abrieron en El Poblado. ¡El mejor restaurante de brasa de Medellín!"
+                        </blockquote>
+                        <footer class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-brand/20 flex items-center justify-center text-brand font-bold text-sm" aria-hidden="true">CM</div>
+                            <div>
+                                <cite class="not-italic text-white font-semibold text-sm">Carolina M.</cite>
+                                <p class="text-gray-500 text-xs">Medellín, Colombia</p>
+                            </div>
+                        </footer>
+                    </article>
+
+                    <!-- Reseña 2 -->
+                    <article class="fade-up group bg-dark-card border border-white/5 rounded-2xl p-6 hover:border-brand/30 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300" style="transition-delay: 0.2s" aria-label="Reseña de James R.">
+                        <div class="flex items-center gap-1 mb-4" aria-label="Calificación: 5 de 5 estrellas">
+                            <svg class="w-5 h-5 text-brand" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                            <svg class="w-5 h-5 text-brand" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                            <svg class="w-5 h-5 text-brand" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                            <svg class="w-5 h-5 text-brand" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                            <svg class="w-5 h-5 text-brand" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        </div>
+                        <blockquote class="text-gray-300 text-sm leading-relaxed mb-4">
+                            "I moved to Miami from New York and this place reminds me of the best BBQ spots back home, but with an amazing Colombian twist. The lomo is out of this world!"
+                        </blockquote>
+                        <footer class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-brand/20 flex items-center justify-center text-brand font-bold text-sm" aria-hidden="true">JR</div>
+                            <div>
+                                <cite class="not-italic text-white font-semibold text-sm">James R.</cite>
+                                <p class="text-gray-500 text-xs">Miami, Florida</p>
+                            </div>
+                        </footer>
+                    </article>
+
+                    <!-- Reseña 3 -->
+                    <article class="fade-up group bg-dark-card border border-white/5 rounded-2xl p-6 hover:border-brand/30 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300" style="transition-delay: 0.3s" aria-label="Reseña de Andrés P.">
+                        <div class="flex items-center gap-1 mb-4" aria-label="Calificación: 5 de 5 estrellas">
+                            <svg class="w-5 h-5 text-brand" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                            <svg class="w-5 h-5 text-brand" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                            <svg class="w-5 h-5 text-brand" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                            <svg class="w-5 h-5 text-brand" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                            <svg class="w-5 h-5 text-brand" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        </div>
+                        <blockquote class="text-gray-300 text-sm leading-relaxed mb-4">
+                            "Celebramos el cumpleaños de mi esposa aquí y el servicio fue espectacular. El chorizo criollo y las costillas... ¡para repetir sin dudarlo!"
+                        </blockquote>
+                        <footer class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-brand/20 flex items-center justify-center text-brand font-bold text-sm" aria-hidden="true">AP</div>
+                            <div>
+                                <cite class="not-italic text-white font-semibold text-sm">Andrés P.</cite>
+                                <p class="text-gray-500 text-xs">Bogotá, Colombia</p>
+                            </div>
+                        </footer>
+                    </article>
+
+                    <!-- Reseña 4 -->
+                    <article class="fade-up group bg-dark-card border border-white/5 rounded-2xl p-6 hover:border-brand/30 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300" style="transition-delay: 0.4s" aria-label="Reseña de María L.">
+                        <div class="flex items-center gap-1 mb-4" aria-label="Calificación: 5 de 5 estrellas">
+                            <svg class="w-5 h-5 text-brand" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                            <svg class="w-5 h-5 text-brand" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                            <svg class="w-5 h-5 text-brand" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                            <svg class="w-5 h-5 text-brand" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                            <svg class="w-5 h-5 text-brand" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        </div>
+                        <blockquote class="text-gray-300 text-sm leading-relaxed mb-4">
+                            "Soy vegetariana y aún así disfruto venir con mi familia. Tienen opciones de vegetales a la brasa que son deliciosas. El ambiente es súper acogedor."
+                        </blockquote>
+                        <footer class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-brand/20 flex items-center justify-center text-brand font-bold text-sm" aria-hidden="true">ML</div>
+                            <div>
+                                <cite class="not-italic text-white font-semibold text-sm">María L.</cite>
+                                <p class="text-gray-500 text-xs">Cali, Colombia</p>
+                            </div>
+                        </footer>
+                    </article>
                 </div>
             </div>
         </section>
