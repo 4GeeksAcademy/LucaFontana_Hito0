@@ -433,7 +433,7 @@ const howFoundSelect = document.querySelector<HTMLSelectElement>('#how-found');
 /**
  * Handles form submission
  */
-function handleSubmit(event) {
+function handleSubmit(event: any) {
     event.preventDefault();
 
     if (validateForm()) {
