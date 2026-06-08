@@ -1,5 +1,7 @@
 
-function validateMenuItem(item: MenuItem): {valid: boolean, errors: string[]}{
+import { MenuItem, SaleTransaction, Localizacion } from "../types/models";
+
+export function validateMenuItem(item: MenuItem): {valid: boolean, errors: string[]}{
     let errores: string[] = []
     let valido: boolean = true; 
 
@@ -15,7 +17,7 @@ function validateMenuItem(item: MenuItem): {valid: boolean, errors: string[]}{
     return {valid: valido, errors: errores};
 }
 
-function validateTransaction(sale: SaleTransaction): {valid: boolean, errors: string[]}{
+export function validateTransaction(sale: SaleTransaction): {valid: boolean, errors: string[]}{
     let errores: string[] = []
 
     //Validaciones
@@ -26,7 +28,7 @@ function validateTransaction(sale: SaleTransaction): {valid: boolean, errors: st
     return {valid: errores.length === 0, errors: errores};
 }
 
-function validateLocation(location: Localizacion): { valid: boolean, errors: string[] }{
+export function validateLocation(location: Localizacion): { valid: boolean, errors: string[] }{
     let errores: string[] = [];
 
     //Obtiene el año actual dinamicamente

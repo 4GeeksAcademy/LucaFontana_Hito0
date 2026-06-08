@@ -441,7 +441,7 @@ function handleSubmit(event: any) {
     } else {
         // Focus first invalid field for accessibility
         if (!form) return;
-        const firstError = form.querySelector('[aria-invalid="true"]');
+        const firstError = form.querySelector('[aria-invalid="true"]') as HTMLElement | null;
         if (firstError) {
             firstError.focus();
         }
