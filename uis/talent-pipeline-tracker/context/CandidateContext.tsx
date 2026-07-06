@@ -21,6 +21,14 @@ import type {
 
 const API_BASE = "https://playground.4geeks.com/tracker/api/v1";
 
+type RecordsListResponse = {
+  data?: CandidateRecordSummary[];
+};
+
+type NotesListResponse = {
+  data?: CandidateNote[];
+};
+
 const CandidateContext = createContext<CandidateContextValue | undefined>(undefined);
 
 export function CandidateProvider({ children }: { children: ReactNode }) {
@@ -45,9 +53,10 @@ export function CandidateProvider({ children }: { children: ReactNode }) {
     setListState({ status: "loading", message: "Cargando candidaturas..." });
 
     try {
-      const response = await fetch(`${API_BASE}/records`, { cache: "no-store" });
-      const data = await parseResponse<CandidateRecordSummary[]>(response);
-      const normalized = Array.isArray(data) ? data.map(normalizeRecordSummary) : [];
+      const response = await fetch(`${API_BASE}/records?limit=1000`, { cache: "no-store" });
+      const data = await parseResponse<CandidateRecordSummary[] | RecordsListResponse>(response);
+      const records = Array.isArray(data) ? data : data?.data ?? [];
+      const normalized = records.map(normalizeRecordSummary);
       setCandidates(normalized);
       setListState({ status: "success", message: "Candidaturas actualizadas." });
     } catch (error) {
@@ -70,8 +79,9 @@ export function CandidateProvider({ children }: { children: ReactNode }) {
         fetch(`${API_BASE}/records/${id}/notes`, { cache: "no-store" }),
       ]);
       const recordData = await parseResponse<Partial<CandidateRecordDetail>>(recordResponse);
-      const notesData = await parseResponse<CandidateNote[]>(notesResponse);
-      const detail = normalizeRecordDetail(recordData, Array.isArray(notesData) ? notesData : []);
+      const notesData = await parseResponse<CandidateNote[] | NotesListResponse>(notesResponse);
+      const notes = Array.isArray(notesData) ? notesData : notesData?.data ?? [];
+      const detail = normalizeRecordDetail(recordData, notes);
 
       setDetails((current) => ({ ...current, [id]: detail }));
       setCandidates((current) => upsertSummary(current, detail));

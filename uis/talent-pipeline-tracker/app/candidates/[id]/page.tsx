@@ -35,15 +35,15 @@ export default function CandidateDetailPage() {
   } = useCandidates();
   const [noteContent, setNoteContent] = useState("");
   const [noteError, setNoteError] = useState<string | null>(null);
+  const detailState = getDetailState(candidateId);
 
   useEffect(() => {
-    if (candidateId) {
+    if (candidateId && detailState.status === "idle") {
       void fetchCandidate(candidateId);
     }
-  }, [candidateId, fetchCandidate]);
+  }, [candidateId, detailState.status, fetchCandidate]);
 
   const candidate = getCandidateDetail(candidateId);
-  const detailState = getDetailState(candidateId);
   const updateState = getUpdateState(candidateId);
   const statusState = getStatusPatchState(candidateId);
   const stageState = getStagePatchState(candidateId);
