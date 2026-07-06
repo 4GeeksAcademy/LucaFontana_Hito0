@@ -19,7 +19,15 @@ import type {
   MutationResult,
 } from "@/types";
 
-const API_BASE = "https://playground.4geeks.com/tracker/api/v1";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, "");
+
+const buildApiUrl = (path: string) => {
+  if (!API_BASE) {
+    throw new Error("Missing NEXT_PUBLIC_API_URL in .env.local");
+  }
+
+  return `${API_BASE}${path}`;
+};
 
 type RecordsListResponse = {
   data?: CandidateRecordSummary[];
@@ -53,7 +61,7 @@ export function CandidateProvider({ children }: { children: ReactNode }) {
     setListState({ status: "loading", message: "Cargando candidaturas..." });
 
     try {
-      const response = await fetch(`${API_BASE}/records?limit=1000`, { cache: "no-store" });
+      const response = await fetch(buildApiUrl("/records?limit=1000"), { cache: "no-store" });
       const data = await parseResponse<CandidateRecordSummary[] | RecordsListResponse>(response);
       const records = Array.isArray(data) ? data : data?.data ?? [];
       const normalized = records.map(normalizeRecordSummary);
@@ -75,8 +83,8 @@ export function CandidateProvider({ children }: { children: ReactNode }) {
 
     try {
       const [recordResponse, notesResponse] = await Promise.all([
-        fetch(`${API_BASE}/records/${id}`, { cache: "no-store" }),
-        fetch(`${API_BASE}/records/${id}/notes`, { cache: "no-store" }),
+        fetch(buildApiUrl(`/records/${id}`), { cache: "no-store" }),
+        fetch(buildApiUrl(`/records/${id}/notes`), { cache: "no-store" }),
       ]);
       const recordData = await parseResponse<Partial<CandidateRecordDetail>>(recordResponse);
       const notesData = await parseResponse<CandidateNote[] | NotesListResponse>(notesResponse);
@@ -120,7 +128,7 @@ export function CandidateProvider({ children }: { children: ReactNode }) {
     };
 
     try {
-      const response = await fetch(`${API_BASE}/records`, {
+      const response = await fetch(buildApiUrl("/records"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -169,7 +177,7 @@ export function CandidateProvider({ children }: { children: ReactNode }) {
     };
 
     try {
-      const response = await fetch(`${API_BASE}/records/${id}`, {
+      const response = await fetch(buildApiUrl(`/records/${id}`), {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -217,7 +225,7 @@ export function CandidateProvider({ children }: { children: ReactNode }) {
     }));
 
     try {
-      const response = await fetch(`${API_BASE}/records/${id}`, {
+      const response = await fetch(buildApiUrl(`/records/${id}`), {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status }),
@@ -250,7 +258,7 @@ export function CandidateProvider({ children }: { children: ReactNode }) {
     }));
 
     try {
-      const response = await fetch(`${API_BASE}/records/${id}`, {
+      const response = await fetch(buildApiUrl(`/records/${id}`), {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ stage }),
@@ -283,7 +291,7 @@ export function CandidateProvider({ children }: { children: ReactNode }) {
     }));
 
     try {
-      const response = await fetch(`${API_BASE}/records/${id}/notes`, {
+      const response = await fetch(buildApiUrl(`/records/${id}/notes`), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ content }),
@@ -347,7 +355,7 @@ export function CandidateProvider({ children }: { children: ReactNode }) {
     }));
 
     try {
-      const response = await fetch(`${API_BASE}/records/${id}/notes/${noteId}`, {
+      const response = await fetch(buildApiUrl(`/records/${id}/notes/${noteId}`), {
         method: "DELETE",
       });
       await parseResponse(response, true);
