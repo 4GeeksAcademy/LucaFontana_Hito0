@@ -1,5 +1,7 @@
 .env*
 !.env.example
+*.pyc
+__pycache__/
 
 # Dependencies
 node_modules/
