@@ -1,2 +1,16 @@
 .env*
 !.env.example
+*.pyc
+__pycache__/
+
+# Dependencies
+node_modules/
+
+# Build outputs
+.next/
+dist/
+build/
+coverage/
+
+# Local tooling caches
+.turbo/
