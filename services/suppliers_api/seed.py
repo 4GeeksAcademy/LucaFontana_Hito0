@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 try:
     from services.suppliers_api.database import get_suppliers_table, utc_now_iso
     from services.suppliers_api.models import SupplierCreate
@@ -28,27 +30,31 @@ SUPPLIERS_SEED = [
 
 
 def main() -> None:
-    answer = input("¿Desea eliminar los registros actuales y agregar los datos de prueba? (y/n): ").strip().lower()
-    if answer == "n":
-        print("Operación cancelada. No se realizaron cambios.")
-        return
-
-    if answer != "y":
-        print("Respuesta no válida. Operación cancelada.")
-        return
-
     suppliers_table = get_suppliers_table()
-    suppliers_table.truncate()
+    existing_keys = {supplier_key(record) for record in suppliers_table.all()}
 
     inserted_count = 0
     for supplier_seed in SUPPLIERS_SEED:
         validated_supplier = SupplierCreate.model_validate(supplier_seed)
         supplier_payload = validated_supplier.model_dump()
+
+        key = supplier_key(supplier_payload)
+        if key in existing_keys:
+            continue
+
         supplier_payload["updated_at"] = utc_now_iso()
         suppliers_table.insert(supplier_payload)
+        existing_keys.add(key)
         inserted_count += 1
 
     print(f"Se insertaron {inserted_count} proveedores de prueba.")
+
+
+def supplier_key(supplier: dict[str, Any]) -> tuple[str, str]:
+    return (
+        str(supplier.get("name", "")).strip().casefold(),
+        str(supplier.get("country", "")).strip(),
+    )
 
 
 if __name__ == "__main__":

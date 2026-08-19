@@ -11,6 +11,8 @@ node_modules/
 dist/
 build/
 coverage/
+myenv/
+.venv/
 
 # Local tooling caches
 .turbo/
