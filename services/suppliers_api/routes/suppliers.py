@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException, Query, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 
-try:
+if __package__:
     from services.suppliers_api.database import (
         document_to_supplier_payload,
         get_suppliers_table,
@@ -14,12 +14,18 @@ try:
         SupplierRateUpdate,
         SupplierStatusUpdate,
     )
-except ImportError:
+    from services.JWTauth_api.auth import get_current_user
+else:
     from database import document_to_supplier_payload, get_suppliers_table, utc_now_iso
     from models import Supplier, SupplierCreate, SupplierRateUpdate, SupplierStatusUpdate
+    from JWTauth_api.auth import get_current_user
 
 
-router = APIRouter(prefix="/suppliers", tags=["suppliers"])
+router = APIRouter(
+    prefix="/suppliers",
+    tags=["suppliers"],
+    dependencies=[Depends(get_current_user)],
+)
 
 
 def get_supplier_or_404(supplier_id: int) -> Supplier:

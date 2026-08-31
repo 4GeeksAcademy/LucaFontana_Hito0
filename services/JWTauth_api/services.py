@@ -4,7 +4,10 @@ from typing import Any
 from passlib.hash import bcrypt
 from tinydb import Query
 
-from database import profiles_table, users_table
+if __package__:
+	from .database import profiles_table, users_table
+else:
+	from database import profiles_table, users_table
 
 
 def _normalize_email(email: str) -> str:

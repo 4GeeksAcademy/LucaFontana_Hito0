@@ -1,8 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
-from auth import get_current_user
-from services import get_profile_by_user_id, update_profile
+if __package__:
+	from .auth import get_current_user
+	from .services import get_profile_by_user_id, update_profile
+else:
+	from auth import get_current_user
+	from services import get_profile_by_user_id, update_profile
 
 
 class ProfileResponse(BaseModel):

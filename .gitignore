@@ -16,3 +16,5 @@ myenv/
 
 # Local tooling caches
 .turbo/
+
+services/JWTauth_api/data/db.json

@@ -4,15 +4,26 @@ import re
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, ConfigDict, field_validator
 
-from auth import get_current_user
-from database import users_table
-from services import (
-	create_user_with_profile,
-	delete_user_and_profile,
-	get_profile_by_user_id,
-	get_user_by_id,
-	update_user,
-)
+if __package__:
+	from .auth import get_current_user
+	from .database import users_table
+	from .services import (
+		create_user_with_profile,
+		delete_user_and_profile,
+		get_profile_by_user_id,
+		get_user_by_id,
+		update_user,
+	)
+else:
+	from auth import get_current_user
+	from database import users_table
+	from services import (
+		create_user_with_profile,
+		delete_user_and_profile,
+		get_profile_by_user_id,
+		get_user_by_id,
+		update_user,
+	)
 
 
 class UserRole(StrEnum):

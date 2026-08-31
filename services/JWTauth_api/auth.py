@@ -10,7 +10,10 @@ from jose import JWTError, jwt
 from passlib.hash import bcrypt
 from pydantic import BaseModel, ConfigDict, ValidationError, field_validator
 
-from services import authenticate_user, get_profile_by_user_id, get_user_by_id, get_user_by_email
+if __package__:
+	from .services import authenticate_user, get_profile_by_user_id, get_user_by_id, get_user_by_email
+else:
+	from services import authenticate_user, get_profile_by_user_id, get_user_by_id, get_user_by_email
 
 
 class UserRole(StrEnum):
