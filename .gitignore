@@ -19,5 +19,5 @@ myenv/
 
 services/JWTauth_api/data/db.json
 
-uis/backoffice/
+uis/backofficesar/
 uis/website/
