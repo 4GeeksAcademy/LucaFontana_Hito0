@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
+import { useAuth } from "@/contexts/AuthContext";
+
 const navigationItems = [
   { href: "/", label: "Inicio" },
   { href: "/incidents", label: "Análisis de incidencias" },
@@ -20,6 +22,7 @@ function isActivePath(pathname: string, href: string) {
 export function AppHeader() {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { isAuthenticated, logout } = useAuth();
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/8 bg-[#090909]/85 backdrop-blur-xl">
@@ -53,6 +56,31 @@ export function AppHeader() {
               </Link>
             );
           })}
+
+          {isAuthenticated ? (
+            <>
+              <Link
+                href="/account/profile"
+                className="rounded-full px-4 py-2 text-sm font-medium text-white/70 transition hover:bg-white/5 hover:text-white"
+              >
+                Mi perfil
+              </Link>
+              <button
+                type="button"
+                onClick={logout}
+                className="rounded-full px-4 py-2 text-sm font-medium text-white/70 transition hover:bg-white/5 hover:text-white"
+              >
+                Cerrar sesión
+              </button>
+            </>
+          ) : (
+            <Link
+              href="/login"
+              className="rounded-full bg-[#f97316]/15 px-4 py-2 text-sm font-medium text-[#fb923c] transition hover:bg-[#f97316]/25"
+            >
+              Iniciar sesión
+            </Link>
+          )}
         </div>
 
         <button
@@ -94,6 +122,36 @@ export function AppHeader() {
                 </Link>
               );
             })}
+
+            {isAuthenticated ? (
+              <>
+                <Link
+                  href="/account/profile"
+                  className="rounded-2xl px-4 py-3 text-sm font-medium text-white/75 hover:bg-white/5 hover:text-white"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Mi perfil
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    logout();
+                  }}
+                  className="rounded-2xl px-4 py-3 text-left text-sm font-medium text-white/75 hover:bg-white/5 hover:text-white"
+                >
+                  Cerrar sesión
+                </button>
+              </>
+            ) : (
+              <Link
+                href="/login"
+                className="rounded-2xl bg-[#f97316]/15 px-4 py-3 text-sm font-medium text-[#fb923c]"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Iniciar sesión
+              </Link>
+            )}
           </div>
         </div>
       ) : null}
