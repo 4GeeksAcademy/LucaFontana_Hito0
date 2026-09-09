@@ -115,7 +115,47 @@ export function createAuthApiClient(baseUrl: string, onUnauthorized: () => void)
     return response.json();
   }
 
-  return { login, register, getMe, updateProfile };
+  async function forgotPassword(email: string): Promise<void> {
+    const response = await request(
+      "/auth/forgot-password",
+      { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email }) },
+      false,
+    );
+    if (!response.ok) {
+      const detail = await extractErrorMessage(response);
+      throw new Error(detail ?? "No se pudo solicitar el restablecimiento");
+    }
+  }
+
+  async function resetPassword(token: string, newPassword: string): Promise<void> {
+    const response = await request(
+      "/auth/reset-password",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token, new_password: newPassword }),
+      },
+      false,
+    );
+    if (!response.ok) {
+      const detail = await extractErrorMessage(response);
+      throw new Error(detail ?? "El enlace no es válido o ya expiró");
+    }
+  }
+
+  async function changePassword(currentPassword: string, newPassword: string): Promise<void> {
+    const response = await request("/auth/change-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ current_password: currentPassword, new_password: newPassword }),
+    });
+    if (!response.ok) {
+      const detail = await extractErrorMessage(response);
+      throw new Error(detail ?? "No se pudo cambiar la contraseña");
+    }
+  }
+
+  return { login, register, getMe, updateProfile, forgotPassword, resetPassword, changePassword };
 }
 
 async function extractErrorMessage(response: Response): Promise<string | null> {

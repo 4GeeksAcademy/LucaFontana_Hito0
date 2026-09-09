@@ -29,6 +29,12 @@ export function AppHeader() {
               >
                 Mi perfil
               </Link>
+              <Link
+                href="/account/change-password"
+                className="rounded-full px-4 py-2 text-sm font-medium text-white/70 transition hover:bg-white/5 hover:text-white"
+              >
+                Cambiar contraseña
+              </Link>
               <button
                 type="button"
                 onClick={logout}

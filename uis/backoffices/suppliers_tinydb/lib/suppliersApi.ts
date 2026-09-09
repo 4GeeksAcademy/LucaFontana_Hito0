@@ -16,6 +16,15 @@ export function buildSuppliersApiUrl(pathname: string, searchParams?: URLSearchP
   return url;
 }
 
+export function forwardAuthorization(request: Request, headers: HeadersInit = {}) {
+  const nextHeaders = new Headers(headers);
+  const authorization = request.headers.get("authorization");
+  if (authorization) {
+    nextHeaders.set("Authorization", authorization);
+  }
+  return nextHeaders;
+}
+
 export async function proxyJsonResponse(response: Response) {
   const contentType = response.headers.get("content-type") ?? "";
 

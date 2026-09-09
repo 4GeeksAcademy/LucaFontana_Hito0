@@ -13,3 +13,4 @@ db = TinyDB(DB_PATH)
 
 users_table = db.table("users")
 profiles_table = db.table("profiles")
+password_reset_tokens_table = db.table("password_reset_tokens")

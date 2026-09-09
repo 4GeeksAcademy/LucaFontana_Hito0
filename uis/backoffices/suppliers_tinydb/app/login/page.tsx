@@ -2,17 +2,22 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function LoginPage() {
   const { login } = useAuth();
   const router = useRouter();
+  const [resetSuccess, setResetSuccess] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    setResetSuccess(new URLSearchParams(window.location.search).get("reset") === "success");
+  }, []);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -35,6 +40,12 @@ export default function LoginPage() {
         <h1 className="font-[var(--font-poppins)] text-3xl font-black text-white">Iniciar sesión</h1>
         <p className="mt-2 text-white/60">Accede al directorio de proveedores con tu email y contraseña.</p>
       </div>
+
+      {resetSuccess ? (
+        <p className="rounded-xl border border-emerald-400/30 bg-emerald-400/10 p-4 text-sm text-emerald-300">
+          Contraseña actualizada. Ya puedes iniciar sesión.
+        </p>
+      ) : null}
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">
         <div className="flex flex-col gap-2">
@@ -66,6 +77,10 @@ export default function LoginPage() {
             className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/40"
           />
         </div>
+
+        <Link href="/forgot-password" className="text-sm font-semibold text-[var(--brand-soft)] hover:underline">
+          ¿Olvidaste tu contraseña?
+        </Link>
 
         {error ? <p className="text-sm font-medium text-red-400">{error}</p> : null}
 

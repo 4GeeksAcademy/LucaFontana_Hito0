@@ -22,6 +22,7 @@ type AuthContextValue = {
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (payload: RegisterPayload) => Promise<void>;
+  changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
   logout: () => void;
   updateProfile: (payload: ProfileUpdatePayload) => Promise<void>;
 };
@@ -71,6 +72,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [apiClient, login],
   );
 
+  const changePassword = useCallback(
+    (currentPassword: string, newPassword: string) => apiClient.changePassword(currentPassword, newPassword),
+    [apiClient],
+  );
+
   const logout = useCallback(() => {
     clearStoredToken();
     setUser(null);
@@ -86,8 +92,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 
   const value = useMemo<AuthContextValue>(
-    () => ({ user, isAuthenticated: user !== null, loading, login, register, logout, updateProfile }),
-    [user, loading, login, register, logout, updateProfile],
+    () => ({ user, isAuthenticated: user !== null, loading, login, register, changePassword, logout, updateProfile }),
+    [user, loading, login, register, changePassword, logout, updateProfile],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
