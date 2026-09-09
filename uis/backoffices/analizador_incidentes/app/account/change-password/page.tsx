@@ -1,0 +1,17 @@
+"use client";
+
+import Link from "next/link";
+import { useState, type FormEvent } from "react";
+
+import { useAuth } from "@/contexts/AuthContext";
+
+export default function ChangePasswordPage() {
+  const { changePassword } = useAuth();
+  const [form, setForm] = useState({ current: "", next: "", confirmation: "" });
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  function update(field: keyof typeof form, value: string) { setForm((current) => ({ ...current, [field]: value })); }
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) { event.preventDefault(); setError(null); setSuccess(null); if (form.next !== form.confirmation) { setError("Las contraseñas nuevas no coinciden."); return; } setIsSubmitting(true); try { await changePassword(form.current, form.next); setForm({ current: "", next: "", confirmation: "" }); setSuccess("Contraseña actualizada correctamente."); } catch (submitError) { setError(submitError instanceof Error ? submitError.message : "No se pudo cambiar la contraseña."); } finally { setIsSubmitting(false); } }
+  return <div className="mx-auto flex w-full max-w-md flex-col gap-8 px-4 py-16 sm:px-6"><div><h1 className="font-[family-name:var(--font-poppins)] text-3xl font-black text-white">Cambiar contraseña</h1><p className="mt-2 text-white/60">Actualiza la contraseña de tu cuenta.</p></div><form onSubmit={handleSubmit} className="flex flex-col gap-5"><label className="flex flex-col gap-2 text-sm font-medium text-white/80" htmlFor="current">Contraseña actual<input id="current" type="password" required autoComplete="current-password" value={form.current} onChange={(event) => update("current", event.target.value)} className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none focus:border-[#f97316] focus:ring-2 focus:ring-[#f97316]/40" /></label><label className="flex flex-col gap-2 text-sm font-medium text-white/80" htmlFor="next">Nueva contraseña<input id="next" type="password" required minLength={8} autoComplete="new-password" value={form.next} onChange={(event) => update("next", event.target.value)} className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none focus:border-[#f97316] focus:ring-2 focus:ring-[#f97316]/40" /></label><label className="flex flex-col gap-2 text-sm font-medium text-white/80" htmlFor="confirmation">Confirmar contraseña<input id="confirmation" type="password" required minLength={8} autoComplete="new-password" value={form.confirmation} onChange={(event) => update("confirmation", event.target.value)} className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none focus:border-[#f97316] focus:ring-2 focus:ring-[#f97316]/40" /></label>{error ? <p className="text-sm font-medium text-red-400">{error}</p> : null}{success ? <p className="text-sm font-medium text-emerald-400">{success}</p> : null}<button type="submit" disabled={isSubmitting} className="rounded-full bg-[#f97316] px-6 py-3 text-base font-bold text-white transition hover:bg-[#ea580c] disabled:cursor-not-allowed disabled:opacity-60">{isSubmitting ? "Guardando…" : "Cambiar contraseña"}</button></form><Link href="/account/profile" className="text-sm font-semibold text-[#fb923c] hover:underline">Volver al perfil</Link></div>;
+}

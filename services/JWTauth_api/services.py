@@ -153,3 +153,10 @@ def authenticate_user(email: str, password: str) -> dict[str, Any] | None:
 	if not bcrypt.verify(password, user["hashed_password"]):
 		return None
 	return user
+
+
+def update_password(user_id: int, password: str) -> dict[str, Any] | None:
+	updated = users_table.update({"hashed_password": bcrypt.hash(password)}, doc_ids=[user_id])
+	if not updated:
+		return None
+	return get_user_by_id(user_id)

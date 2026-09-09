@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { buildSuppliersApiUrl, proxyErrorResponse, proxyJsonResponse } from "@/lib/suppliersApi";
+import { buildSuppliersApiUrl, forwardAuthorization, proxyErrorResponse, proxyJsonResponse } from "@/lib/suppliersApi";
 
 export async function PATCH(request: Request) {
   try {
@@ -13,9 +13,9 @@ export async function PATCH(request: Request) {
     const payload = await request.json();
     const response = await fetch(buildSuppliersApiUrl(`suppliers/${supplierId}/rate`), {
       method: "PATCH",
-      headers: {
+      headers: forwardAuthorization(request, {
         "Content-Type": "application/json",
-      },
+      }),
       body: JSON.stringify(payload),
       cache: "no-store",
     });

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { buildSuppliersApiUrl, proxyErrorResponse, proxyJsonResponse } from "@/lib/suppliersApi";
+import { buildSuppliersApiUrl, forwardAuthorization, proxyErrorResponse, proxyJsonResponse } from "@/lib/suppliersApi";
 
 export async function GET(request: Request) {
   try {
@@ -14,6 +14,7 @@ export async function GET(request: Request) {
       }
 
       const response = await fetch(buildSuppliersApiUrl(`suppliers/${parsedId}`), {
+        headers: forwardAuthorization(request),
         cache: "no-store",
       });
 
@@ -21,6 +22,7 @@ export async function GET(request: Request) {
     }
 
     const response = await fetch(buildSuppliersApiUrl("suppliers", incomingUrl.searchParams), {
+      headers: forwardAuthorization(request),
       cache: "no-store",
     });
 
@@ -35,9 +37,9 @@ export async function POST(request: Request) {
     const payload = await request.json();
     const response = await fetch(buildSuppliersApiUrl("suppliers"), {
       method: "POST",
-      headers: {
+      headers: forwardAuthorization(request, {
         "Content-Type": "application/json",
-      },
+      }),
       body: JSON.stringify(payload),
       cache: "no-store",
     });
@@ -64,6 +66,7 @@ export async function DELETE(request: Request) {
 
     const response = await fetch(buildSuppliersApiUrl(`suppliers/${parsedId}`), {
       method: "DELETE",
+      headers: forwardAuthorization(request),
       cache: "no-store",
     });
 

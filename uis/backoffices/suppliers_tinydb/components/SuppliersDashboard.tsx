@@ -1,6 +1,7 @@
 "use client";
 
 import { startTransition, useDeferredValue, useEffect, useMemo, useState } from "react";
+import { getStoredToken } from "@shared/auth";
 import {
   CATEGORY_LABELS,
   CATEGORY_OPTIONS,
@@ -42,6 +43,15 @@ type ApiValidationItem = {
   loc?: Array<string | number>;
   msg?: string;
 };
+
+function suppliersRequest(input: RequestInfo | URL, init: RequestInit = {}) {
+  const headers = new Headers(init.headers);
+  const token = getStoredToken();
+  if (token) {
+    headers.set("Authorization", `Bearer ${token}`);
+  }
+  return fetch(input, { ...init, headers });
+}
 
 const EMPTY_FORM: SupplierFormState = {
   name: "",
@@ -204,7 +214,7 @@ export function SuppliersDashboard({ apiBaseUrl }: SuppliersDashboardProps) {
     setFormErrors({});
 
     try {
-      const response = await fetch("/api/suppliers", {
+      const response = await suppliersRequest("/api/suppliers", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -245,7 +255,7 @@ export function SuppliersDashboard({ apiBaseUrl }: SuppliersDashboardProps) {
     setRowMessages((current) => ({ ...current, [supplier.id]: undefined }));
 
     try {
-      const response = await fetch(`/api/suppliers/status?id=${supplier.id}`, {
+      const response = await suppliersRequest(`/api/suppliers/status?id=${supplier.id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -287,7 +297,7 @@ export function SuppliersDashboard({ apiBaseUrl }: SuppliersDashboardProps) {
     setRowMessages((current) => ({ ...current, [supplier.id]: undefined }));
 
     try {
-      const response = await fetch(`/api/suppliers/rate?id=${supplier.id}`, {
+      const response = await suppliersRequest(`/api/suppliers/rate?id=${supplier.id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -353,7 +363,7 @@ export function SuppliersDashboard({ apiBaseUrl }: SuppliersDashboardProps) {
     setRowMessages((current) => ({ ...current, [supplier.id]: undefined }));
 
     try {
-      const response = await fetch(`/api/suppliers?id=${supplier.id}`, {
+      const response = await suppliersRequest(`/api/suppliers?id=${supplier.id}`, {
         method: "DELETE",
       });
 
@@ -889,7 +899,7 @@ async function fetchSuppliersList(filters: FilterState) {
     searchParams.set("category", filters.category);
   }
 
-  const response = await fetch(`/api/suppliers?${searchParams.toString()}`, { cache: "no-store" });
+  const response = await suppliersRequest(`/api/suppliers?${searchParams.toString()}`, { cache: "no-store" });
   const payload = (await response.json()) as Supplier[] | { detail?: unknown };
 
   if (!response.ok) {
@@ -908,7 +918,7 @@ async function fetchSuppliersView(filters: FilterState, supplierId: number | nul
 }
 
 async function fetchSupplierById(supplierId: number) {
-  const response = await fetch(`/api/suppliers?id=${supplierId}`, { cache: "no-store" });
+  const response = await suppliersRequest(`/api/suppliers?id=${supplierId}`, { cache: "no-store" });
   const payload = (await response.json()) as Supplier | { detail?: unknown };
 
   if (!response.ok) {
