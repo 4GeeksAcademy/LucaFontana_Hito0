@@ -68,9 +68,9 @@ def create_user_with_profile(
 		}
 		profile_id = profiles_table.insert(profile_data)
 		profiles_table.update({"id": profile_id}, doc_ids=[profile_id])
-	except Exception:
+	except Exception as exc:
 		users_table.remove(doc_ids=[user_id])
-		raise
+		raise RuntimeError("User/profile creation failed") from exc
 
 	user = get_user_by_id(user_id)
 	profile = get_profile_by_user_id(user_id)

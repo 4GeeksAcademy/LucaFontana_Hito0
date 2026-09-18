@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 
 import { createAuthApiClient, resolveAuthApiBaseUrl } from "@shared/auth";
 
@@ -10,17 +10,17 @@ const api = createAuthApiClient(resolveAuthApiBaseUrl(), () => undefined);
 
 export default function ResetPasswordPage() {
   const router = useRouter();
-  const [token, setToken] = useState("");
+  const token = typeof window === "undefined" ? "" : new URLSearchParams(window.location.search).get("token") ?? "";
   const [password, setPassword] = useState("");
   const [confirmation, setConfirmation] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useEffect(() => {
+  const [error, setError] = useState<string | null>(() => {
+    if (typeof window === "undefined") {
+      return null;
+    }
     const queryToken = new URLSearchParams(window.location.search).get("token") ?? "";
-    setToken(queryToken);
-    if (!queryToken) setError("El enlace de recuperación no contiene un token válido.");
-  }, []);
+    return queryToken ? null : "El enlace de recuperación no contiene un token válido.";
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

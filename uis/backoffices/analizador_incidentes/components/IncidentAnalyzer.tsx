@@ -33,12 +33,20 @@ const generalMetrics = [
 function readErrorMessage(payload: unknown, fallbackMessage: string) {
   if (payload && typeof payload === "object" && "detail" in payload) {
     const detail = payload.detail;
-    if (typeof detail === "string") {
+    if (typeof detail === "string" && detail.trim()) {
       return detail;
     }
   }
 
   return fallbackMessage;
+}
+
+async function safeParseJson(response: Response) {
+  try {
+    return await response.json();
+  } catch {
+    return null;
+  }
 }
 
 function clampWidth(percentage: number) {
@@ -92,15 +100,15 @@ export function IncidentAnalyzer() {
         body: formData,
       });
 
-      const payload = await response.json().catch(() => null);
+      const payload = await safeParseJson(response);
 
       if (!response.ok) {
         throw new Error(
-          readErrorMessage(payload, "No se pudo analizar el archivo de incidencias."),
+          readErrorMessage(payload, "No se pudo analizar el archivo de incidencias. Revisa el CSV e inténtalo de nuevo."),
         );
       }
 
-      setAnalysis(payload as IncidentAnalysisResponse);
+      setAnalysis((payload ?? null) as IncidentAnalysisResponse | null);
     } catch (error) {
       setAnalysis(null);
       setSubmitError(
@@ -121,9 +129,9 @@ export function IncidentAnalyzer() {
       const response = await fetch(exportEndpoint);
 
       if (!response.ok) {
-        const payload = await response.json().catch(() => null);
+        const payload = await safeParseJson(response);
         throw new Error(
-          readErrorMessage(payload, "No se pudo descargar el resultado exportado."),
+          readErrorMessage(payload, "No se pudo descargar el resultado exportado. Reintenta en unos segundos."),
         );
       }
 
@@ -195,6 +203,12 @@ export function IncidentAnalyzer() {
                 {selectedFile ? `Archivo listo: ${selectedFile.name}` : "Aún no hay archivo seleccionado"}
               </div>
 
+              {submitError ? (
+                <div className="mt-4 rounded-2xl border border-rose-500/30 bg-rose-500/10 p-4 text-sm text-rose-200" role="alert">
+                  {submitError}
+                </div>
+              ) : null}
+
               <input
                 ref={inputRef}
                 id="incident-upload"
@@ -214,6 +228,16 @@ export function IncidentAnalyzer() {
               >
                 {isSubmitting ? "Analizando archivo..." : "Analizar incidencias"}
               </button>
+
+              {submitError ? (
+                <button
+                  type="button"
+                  onClick={handleAnalyze}
+                  className="inline-flex items-center justify-center rounded-full border border-[#f97316]/40 bg-[#f97316]/10 px-6 py-3 text-base font-bold text-[#fed7aa] transition hover:bg-[#f97316]/15"
+                >
+                  Reintentar análisis
+                </button>
+              ) : null}
 
               <button
                 type="button"
