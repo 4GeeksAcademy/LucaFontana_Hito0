@@ -41,7 +41,10 @@ export async function proxyJsonResponse(response: Response) {
 }
 
 export function proxyErrorResponse(error: unknown) {
-  const message = error instanceof Error ? error.message : "No se pudo contactar la API de proveedores.";
+  const detail = error instanceof Error && error.message ? error.message : "No se pudo contactar la API de proveedores.";
+  const message = detail.includes("fetch") || detail.includes("Failed to fetch") || detail.includes("network")
+    ? "No se pudo contactar la API de proveedores. Reintenta más tarde."
+    : "No se pudo completar la operación con el directorio de proveedores.";
   return NextResponse.json({ detail: message }, { status: 502 });
 }
 

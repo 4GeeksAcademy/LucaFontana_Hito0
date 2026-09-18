@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import sys
 from typing import Any
 
 try:
@@ -29,25 +30,30 @@ SUPPLIERS_SEED = [
 ]
 
 
-def main() -> None:
-    suppliers_table = get_suppliers_table()
-    existing_keys = {supplier_key(record) for record in suppliers_table.all()}
+def main() -> int:
+    try:
+        suppliers_table = get_suppliers_table()
+        existing_keys = {supplier_key(record) for record in suppliers_table.all()}
 
-    inserted_count = 0
-    for supplier_seed in SUPPLIERS_SEED:
-        validated_supplier = SupplierCreate.model_validate(supplier_seed)
-        supplier_payload = validated_supplier.model_dump()
+        inserted_count = 0
+        for supplier_seed in SUPPLIERS_SEED:
+            validated_supplier = SupplierCreate.model_validate(supplier_seed)
+            supplier_payload = validated_supplier.model_dump()
 
-        key = supplier_key(supplier_payload)
-        if key in existing_keys:
-            continue
+            key = supplier_key(supplier_payload)
+            if key in existing_keys:
+                continue
 
-        supplier_payload["updated_at"] = utc_now_iso()
-        suppliers_table.insert(supplier_payload)
-        existing_keys.add(key)
-        inserted_count += 1
+            supplier_payload["updated_at"] = utc_now_iso()
+            suppliers_table.insert(supplier_payload)
+            existing_keys.add(key)
+            inserted_count += 1
 
-    print(f"Se insertaron {inserted_count} proveedores de prueba.")
+        print(f"Se insertaron {inserted_count} proveedores de prueba.")
+        return 0
+    except Exception as exc:  # pragma: no cover - safeguard for missing DB or bad payloads
+        print(f"Error: No se pudieron inicializar los proveedores: {exc}", file=sys.stderr)
+        return 1
 
 
 def supplier_key(supplier: dict[str, Any]) -> tuple[str, str]:
@@ -58,4 +64,4 @@ def supplier_key(supplier: dict[str, Any]) -> tuple[str, str]:
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

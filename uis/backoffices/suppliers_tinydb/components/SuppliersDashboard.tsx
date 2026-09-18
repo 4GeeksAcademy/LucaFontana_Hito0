@@ -671,7 +671,16 @@ export function SuppliersDashboard({ apiBaseUrl }: SuppliersDashboardProps) {
 
               {loadError ? (
                 <div className="border-b border-white/8 bg-rose-500/10 px-5 py-4 text-sm text-rose-200 sm:px-6">
-                  {loadError}
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <span>{loadError}</span>
+                    <button
+                      type="button"
+                      onClick={() => void fetchSuppliersView(filters, activeSupplierIdSearch)}
+                      className="inline-flex items-center justify-center rounded-full border border-rose-300/30 bg-rose-500/10 px-4 py-2 font-semibold text-rose-100 transition hover:bg-rose-500/15"
+                    >
+                      Reintentar carga
+                    </button>
+                  </div>
                 </div>
               ) : null}
 
@@ -899,14 +908,21 @@ async function fetchSuppliersList(filters: FilterState) {
     searchParams.set("category", filters.category);
   }
 
-  const response = await suppliersRequest(`/api/suppliers?${searchParams.toString()}`, { cache: "no-store" });
-  const payload = (await response.json()) as Supplier[] | { detail?: unknown };
+  try {
+    const response = await suppliersRequest(`/api/suppliers?${searchParams.toString()}`, { cache: "no-store" });
+    const payload = (await response.json()) as Supplier[] | { detail?: unknown };
 
-  if (!response.ok) {
-    throw new Error(extractErrorMessage(payload));
+    if (!response.ok) {
+      throw new Error(extractErrorMessage(payload));
+    }
+
+    return payload as Supplier[];
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(error.message || "No se pudo cargar el directorio de proveedores.");
+    }
+    throw new Error("No se pudo cargar el directorio de proveedores.");
   }
-
-  return payload as Supplier[];
 }
 
 async function fetchSuppliersView(filters: FilterState, supplierId: number | null) {
@@ -918,15 +934,22 @@ async function fetchSuppliersView(filters: FilterState, supplierId: number | nul
 }
 
 async function fetchSupplierById(supplierId: number) {
-  const response = await suppliersRequest(`/api/suppliers?id=${supplierId}`, { cache: "no-store" });
-  const payload = (await response.json()) as Supplier | { detail?: unknown };
+  try {
+    const response = await suppliersRequest(`/api/suppliers?id=${supplierId}`, { cache: "no-store" });
+    const payload = (await response.json()) as Supplier | { detail?: unknown };
 
-  if (!response.ok) {
-    const message = extractErrorMessage(payload);
-    throw new Error(response.status === 404 ? `404: ${message}` : message);
+    if (!response.ok) {
+      const message = extractErrorMessage(payload);
+      throw new Error(response.status === 404 ? "No se encontró el proveedor solicitado." : message || "No se pudo cargar el proveedor.");
+    }
+
+    return payload as Supplier;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(error.message || "No se pudo cargar el proveedor.");
+    }
+    throw new Error("No se pudo cargar el proveedor.");
   }
-
-  return payload as Supplier;
 }
 
 function mapApiValidationErrors(payload: { detail?: unknown }): FormErrors {

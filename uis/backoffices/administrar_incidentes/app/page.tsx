@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useCallback, useEffect, useState } from "react";
 
 const API = process.env.NEXT_PUBLIC_INCIDENTS_API_URL ?? "https://fuzzy-space-computing-machine-5g4qpxv57495cv6vx-8000.app.github.dev";
 const branches = {
@@ -17,31 +17,55 @@ type Summary = { by_status: Record<string, number>; by_category: Record<string, 
 const initialForm = { title: "", description: "", category: "", origin: "", branch: "central" };
 const initialFilters: Filters = { status: "", origin: "", branch: "", category: "" };
 
-async function request(path: string, options?: RequestInit) {
-    const response = await fetch(`${API}${path}`, { ...options, headers: { "Content-Type": "application/json", ...options?.headers } });
-    const body = await response.json();
-    if (!response.ok) {
-        const fieldMessage = body.errors && Object.values(body.errors)[0];
-        throw { message: fieldMessage ?? body.detail ?? "No se pudo completar la solicitud", errors: body.errors };
+async function request<T = Record<string, unknown> | null>(path: string, options?: RequestInit): Promise<T> {
+    let response: Response;
+    try {
+        response = await fetch(`${API}${path}`, { ...options, headers: { "Content-Type": "application/json", ...options?.headers } });
+    } catch {
+        throw new Error("No se pudo conectar con el servicio de incidentes. Revisa la conexión e inténtalo de nuevo.");
     }
-    return body;
+
+    let body: Record<string, unknown> | null;
+    try {
+        body = (await response.json()) as Record<string, unknown>;
+    } catch {
+        body = null;
+    }
+
+    if (!response.ok) {
+        const errors = body && typeof body.errors === "object" && body.errors !== null ? body.errors as Record<string, unknown> : {};
+        const fieldMessage = Object.values(errors)[0];
+        const message = fieldMessage ?? (body && typeof body.detail === "string" ? body.detail : "La solicitud no pudo completarse en este momento.");
+        throw { message: String(message), errors };
+    }
+    return body as T;
 }
 
 export default function Home() {
     const [form, setForm] = useState(initialForm); const [formErrors, setFormErrors] = useState<Record<string, string>>({}); const [formMessage, setFormMessage] = useState(""); const [isSubmitting, setIsSubmitting] = useState(false);
     const [filters, setFilters] = useState(initialFilters); const [incidents, setIncidents] = useState<Incident[]>([]); const [isLoading, setIsLoading] = useState(true); const [listError, setListError] = useState(""); const [summary, setSummary] = useState<Summary | null>(null); const [summaryError, setSummaryError] = useState(""); const [notice, setNotice] = useState("");
     const [searchId, setSearchId] = useState(""); const [searchResult, setSearchResult] = useState<Incident | null>(null); const [searchError, setSearchError] = useState(""); const [isSearching, setIsSearching] = useState(false);
-    async function loadIncidents() { setIsLoading(true); setListError(""); const query = new URLSearchParams(Object.entries(filters).filter(([, value]) => value)); try { setIncidents(await request(`/api/incidents${query.size ? `?${query}` : ""}`)); } catch (error) { setListError(error instanceof Error ? error.message : "No se pudieron cargar los incidentes"); } finally { setIsLoading(false); } }
-    async function loadSummary() { try { setSummary(await request("/api/incidents/summary")); setSummaryError(""); } catch { setSummaryError("El resumen no está disponible temporalmente."); } }
-    // These effects intentionally trigger the request helpers whenever filters or the page mount changes.
-    // eslint-disable-next-line react-hooks/set-state-in-effect, react-hooks/exhaustive-deps
-    useEffect(() => { void loadIncidents(); }, [filters]);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    useEffect(() => { void loadSummary(); }, []);
+    const loadIncidents = useCallback(async () => {
+        setIsLoading(true); setListError(""); const query = new URLSearchParams(Object.entries(filters).filter(([, value]) => value)); try { setIncidents(await request<Incident[]>(`/api/incidents${query.size ? `?${query}` : ""}`)); } catch (error) { setListError(error && typeof error === "object" && "message" in error ? String((error as { message: string }).message) : "No se pudieron cargar los incidentes. Inténtalo de nuevo."); } finally { setIsLoading(false); } 
+    }, [filters]);
+    const loadSummary = useCallback(async () => { try { setSummary(await request<Summary>("/api/incidents/summary")); setSummaryError(""); } catch { setSummaryError("El resumen no está disponible temporalmente. Reintenta en unos segundos."); } }, []);
+    useEffect(() => {
+        const currentTimer = window.setTimeout(() => {
+            void loadIncidents();
+        }, 0);
+        return () => window.clearTimeout(currentTimer);
+    }, [loadIncidents]);
+
+    useEffect(() => {
+        const currentTimer = window.setTimeout(() => {
+            void loadSummary();
+        }, 0);
+        return () => window.clearTimeout(currentTimer);
+    }, [loadSummary]);
     function updateForm(field: string, value: string) { setForm((current) => ({ ...current, [field]: value })); setFormErrors((current) => ({ ...current, [field]: "" })); setFormMessage(""); }
     async function submitIncident(event: FormEvent<HTMLFormElement>) { event.preventDefault(); const errors: Record<string, string> = {}; if (!form.title.trim()) errors.title = "El título es obligatorio"; if (!form.description.trim()) errors.description = "La descripción es obligatoria"; if (!form.category) errors.category = "Selecciona una categoría"; if (!form.origin) errors.origin = "Selecciona el origen"; if (!form.branch) errors.branch = "Selecciona una sede"; if (Object.keys(errors).length) { setFormErrors(errors); return; } setIsSubmitting(true); setFormErrors({}); setFormMessage(""); try { await request("/api/incidents", { method: "POST", body: JSON.stringify(form) }); setForm(initialForm); setFormMessage("Incidente registrado correctamente."); await Promise.all([loadIncidents(), loadSummary()]); } catch (error) { setFormErrors(error && typeof error === "object" && "errors" in error ? (error as { errors: Record<string, string> }).errors : { form: "No se pudo registrar el incidente." }); } finally { setIsSubmitting(false); } }
     async function changeStatus(incident: Incident, nextStatus: Status) { if (nextStatus === incident.status) return; setIncidents((current) => current.map((item) => item.id === incident.id ? { ...item, status: nextStatus } : item)); try { await request(`/api/incidents/${incident.id}/status`, { method: "PATCH", body: JSON.stringify({ status: nextStatus }) }); await loadSummary(); } catch (error) { setIncidents((current) => current.map((item) => item.id === incident.id ? incident : item)); setNotice(error && typeof error === "object" && "message" in error ? String((error as { message: string }).message) : "No se pudo actualizar el estado."); } }
-    async function searchIncident(event: FormEvent<HTMLFormElement>) { event.preventDefault(); const id = searchId.trim(); if (!id) { setSearchError("Ingresa un ID de incidente"); setSearchResult(null); return; } setIsSearching(true); setSearchError(""); try { setSearchResult(await request(`/api/incidents/${encodeURIComponent(id)}`)); } catch (error) { setSearchResult(null); setSearchError(error && typeof error === "object" && "message" in error ? String((error as { message: string }).message) : "Incidente no encontrado"); } finally { setIsSearching(false); } }
+    async function searchIncident(event: FormEvent<HTMLFormElement>) { event.preventDefault(); const id = searchId.trim(); if (!id) { setSearchError("Ingresa un ID de incidente"); setSearchResult(null); return; } setIsSearching(true); setSearchError(""); try { setSearchResult(await request<Incident>(`/api/incidents/${encodeURIComponent(id)}`)); } catch (error) { setSearchResult(null); setSearchError(error && typeof error === "object" && "message" in error ? String((error as { message: string }).message) : "Incidente no encontrado"); } finally { setIsSearching(false); } }
     function clearSearch() { setSearchId(""); setSearchResult(null); setSearchError(""); }
     return <main className="shell"><header className="topbar"><div><p className="eyebrow">BRASALAND DIGITAL / OPERACIONES</p><h1>Centro de incidentes</h1></div><span className="live-pill"><i /> Monitoreo activo</span></header>{notice && <div className="notice error" role="alert">{notice}<button onClick={() => setNotice("")} aria-label="Cerrar aviso">×</button></div>}<section className="summary-grid"><Metric label="Abiertos" value={summary?.by_status.open ?? "—"} tone="orange" /><Metric label="En progreso" value={summary?.by_status.in_progress ?? "—"} tone="blue" /><Metric label="Resueltos" value={summary?.by_status.resolved ?? "—"} tone="green" /><Metric label="Total registrado" value={summary ? Object.values(summary.by_status).reduce((a, b) => a + b, 0) : "—"} tone="dark" /></section>{summaryError && <p className="quiet-error">{summaryError}</p>}<div className="dashboard-grid"><section className="panel form-panel"><div className="panel-heading"><div><p className="eyebrow">NUEVO REGISTRO</p><h2>Reportar incidente</h2></div><span className="required">* Campos requeridos</span></div><form onSubmit={submitIncident} noValidate><Field label="Título" error={formErrors.title}><input value={form.title} onChange={(e) => updateForm("title", e.target.value)} placeholder="Ej. Terminal POS fuera de servicio" /></Field><Field label="Descripción" error={formErrors.description}><textarea value={form.description} onChange={(e) => updateForm("description", e.target.value)} placeholder="Describe qué ocurrió y qué impacto tiene..." rows={4} /></Field><div className="two-fields"><Field label="Categoría" error={formErrors.category}><select value={form.category} onChange={(e) => updateForm("category", e.target.value)}><option value="">Selecciona una categoría</option>{categories.map((item) => <option key={item} value={item}>{categoryLabels[item]}</option>)}</select></Field><Field label="Origen" error={formErrors.origin}><select value={form.origin} onChange={(e) => updateForm("origin", e.target.value)}><option value="">Selecciona el origen</option><option value="customer">Cliente</option><option value="branch">Sede</option><option value="internal">Equipo interno</option></select></Field></div><Field label="Sede responsable" error={formErrors.branch}><div className={`branch-field ${form.origin === "branch" ? "highlight" : ""}`}><select value={form.branch} onChange={(e) => updateForm("branch", e.target.value)}>{Object.entries(branches).map(([key, label]) => <option key={key} value={key}>{label}</option>)}</select>{form.origin === "branch" && <span className="branch-hint">Origen local seleccionado</span>}</div></Field>{formErrors.form && <p className="field-error">{formErrors.form}</p>}{formMessage && <p className="success-message">✓ {formMessage}</p>}<button className="submit-button" disabled={isSubmitting}>{isSubmitting ? "Registrando..." : "Registrar incidente"}<span>↗</span></button></form></section><section className="panel list-panel"><div className="panel-heading"><div><p className="eyebrow">COLA OPERATIVA</p><h2>Incidentes recientes</h2></div><span className="count-badge">{incidents.length}</span></div><form className="search-bar" onSubmit={searchIncident}><input value={searchId} onChange={(e) => setSearchId(e.target.value)} placeholder="Buscar por ID de incidente" aria-label="Buscar por ID de incidente" /><button type="submit" disabled={isSearching}>{isSearching ? "Buscando..." : "Buscar"}</button>{(searchResult || searchError) && <button type="button" className="clear-search" onClick={clearSearch}>Limpiar</button>}</form>{searchError && <p className="field-error">{searchError}</p>}<div className="filters">{(["status", "origin", "branch", "category"] as const).map((key) => <select key={key} value={filters[key]} onChange={(e) => setFilters((current) => ({ ...current, [key]: e.target.value }))}><option value="">{key === "status" ? "Todos los estados" : key === "origin" ? "Todos los orígenes" : key === "branch" ? "Todas las sedes" : "Todas las categorías"}</option>{(key === "status" ? statuses : key === "origin" ? ["customer", "branch", "internal"] : key === "branch" ? Object.keys(branches) : categories).map((item) => <option key={item} value={item}>{key === "status" ? statusLabels[item] : key === "branch" ? branches[item as keyof typeof branches] : key === "category" ? categoryLabels[item] : item === "customer" ? "Cliente" : item === "branch" ? "Sede" : "Equipo interno"}</option>)}</select>)}</div>{searchResult ? <div className="incident-list"><article className="incident-row" key={searchResult.id}><div className="incident-main"><span className={`status-dot ${searchResult.status}`} /><div><h3>{searchResult.title}</h3><p className="incident-id">ID: {searchResult.id}</p><p>{categoryLabels[searchResult.category]} · {branches[searchResult.branch as keyof typeof branches] ?? searchResult.branch}</p></div></div><select className={`status-select ${searchResult.status}`} value={searchResult.status} onChange={(e) => void changeStatus(searchResult, e.target.value as Status)}>{statuses.map((item) => <option key={item} value={item}>{statusLabels[item]}</option>)}</select></article></div> : isLoading ? <div className="state"><span className="spinner" />Cargando incidentes...</div> : listError ? <div className="state"><strong>No se pudo cargar la cola</strong><p>{listError}</p><button className="retry-button" onClick={() => void loadIncidents()}>Reintentar</button></div> : incidents.length === 0 ? <div className="state"><span className="empty-icon">○</span><strong>No hay incidentes para mostrar</strong><p>Registra un incidente o cambia los filtros para ver resultados.</p></div> : <div className="incident-list">{incidents.map((incident) => <article className="incident-row" key={incident.id}><div className="incident-main"><span className={`status-dot ${incident.status}`} /><div><h3>{incident.title}</h3><p className="incident-id">ID: {incident.id}</p><p>{categoryLabels[incident.category]} · {branches[incident.branch as keyof typeof branches] ?? incident.branch}</p></div></div><select className={`status-select ${incident.status}`} value={incident.status} onChange={(e) => void changeStatus(incident, e.target.value as Status)}>{statuses.map((item) => <option key={item} value={item}>{statusLabels[item]}</option>)}</select></article>)}</div>}</section></div></main>;
 }

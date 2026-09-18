@@ -214,15 +214,16 @@ def _send_reset_email(email: str, reset_url: str) -> None:
 		pass
 
 
-async def _send_reset_email_safely(email: str, reset_url: str) -> None:
+async def _send_reset_email_safely(email: str, reset_url: str) -> bool:
 	try:
 		await asyncio.to_thread(_send_reset_email, email, reset_url)
+		return True
 	except urllib.error.HTTPError as error:
-		body = error.read().decode("utf-8", errors="replace")[:500]
-		logger.error("Resend rejected password reset email: status=%s body=%s", error.code, body)
+		logger.error("Resend rejected password reset email: status=%s", error.code)
+		return False
 	except (urllib.error.URLError, TimeoutError) as error:
-		logger.error("Could not reach Resend for password reset email: %s", error)
-		return
+		logger.warning("Password reset email provider unavailable: %s", type(error).__name__)
+		return False
 
 
 @router.post("/login", response_model=TokenResponse)
@@ -234,8 +235,8 @@ async def login(form: OAuth2PasswordRequestForm = Depends()) -> TokenResponse:
 				"password": form.password,
 			}
 		)
-	except ValidationError as exc:
-		raise HTTPException(status_code=422, detail=exc.errors())
+	except ValidationError:
+		raise HTTPException(status_code=422, detail="Correo electrónico o contraseña inválidos.")
 
 	email = payload.username
 	password = payload.password
@@ -270,7 +271,7 @@ async def forgot_password(payload: ForgotPasswordPayload) -> dict[str, str]:
 		)
 		password_reset_tokens_table.update({"id": doc_id}, doc_ids=[doc_id])
 		reset_url = f"{RESET_URL}?token={raw_token}"
-		await _send_reset_email_safely(user["email"], reset_url)
+		_ = await _send_reset_email_safely(user["email"], reset_url)
 
 	return {"message": "If that email address is registered, you will receive a reset link shortly."}
 

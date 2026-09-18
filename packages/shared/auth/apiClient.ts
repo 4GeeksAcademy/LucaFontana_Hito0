@@ -8,22 +8,17 @@ export class UnauthorizedError extends Error {
   }
 }
 
+const INVALID_CREDENTIALS_MESSAGE = "Email o contraseña incorrectos. Vuelve a intentarlo.";
+const AUTH_SERVICE_ERROR_MESSAGE = "Se produjo un error en nuestros servicios. Inténtalo de nuevo más tarde.";
+
 export function resolveAuthApiBaseUrl(): string {
+  if (typeof window !== "undefined") {
+    return "/api/auth";
+  }
+
   const configured = process.env.NEXT_PUBLIC_AUTH_API_URL;
   if (configured) {
     return configured.replace(/\/+$/, "");
-  }
-
-  if (typeof window !== "undefined") {
-    const hostname = window.location.hostname;
-    if (hostname.endsWith(".app.github.dev")) {
-      const baseHost = hostname.replace(/-\d+\.app\.github\.dev$/, "");
-      return `https://${baseHost}-8001.app.github.dev`;
-    }
-
-    if (hostname === "localhost" || hostname === "127.0.0.1") {
-      return "http://127.0.0.1:8001";
-    }
   }
 
   return "http://127.0.0.1:8001";
@@ -47,9 +42,14 @@ export function createAuthApiClient(baseUrl: string, onUnauthorized: () => void)
       }
     }
 
-    const response = await fetch(`${normalizedBaseUrl}${path}`, { ...init, headers });
+    let response: Response;
+    try {
+      response = await fetch(`${normalizedBaseUrl}${path}`, { ...init, headers });
+    } catch {
+      throw new Error(AUTH_SERVICE_ERROR_MESSAGE);
+    }
 
-    if (response.status === 401) {
+    if (response.status === 401 && requireAuth) {
       clearStoredToken();
       onUnauthorized();
       throw new UnauthorizedError();
@@ -67,8 +67,11 @@ export function createAuthApiClient(baseUrl: string, onUnauthorized: () => void)
     );
 
     if (!response.ok) {
-      const detail = await extractErrorMessage(response);
-      throw new Error(detail ?? "Credenciales inválidas");
+      if (response.status === 401 || response.status === 422) {
+        throw new Error(INVALID_CREDENTIALS_MESSAGE);
+      }
+
+      throw new Error(AUTH_SERVICE_ERROR_MESSAGE);
     }
 
     return response.json();
@@ -167,8 +170,8 @@ async function extractErrorMessage(response: Response): Promise<string | null> {
     if (Array.isArray(data?.detail) && data.detail[0]?.msg) {
       return data.detail[0].msg;
     }
-  } catch {
-    // response body was not JSON
+  } catch (error) {
+    console.warn("Auth API returned a non-JSON error payload.", error);
   }
   return null;
 }
