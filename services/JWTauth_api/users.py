@@ -66,8 +66,16 @@ class UserCreateRequest(BaseModel):
 	@field_validator("email")
 	@classmethod
 	def validate_email(cls, value: str) -> str:
+		value = value.strip()
 		if not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", value):
 			raise ValueError("Invalid email format")
+		return value
+
+	@field_validator("password")
+	@classmethod
+	def validate_password(cls, value: str) -> str:
+		if len(value) < 8 or not value.strip():
+			raise ValueError("Password must be at least 8 characters long")
 		return value
 
 
