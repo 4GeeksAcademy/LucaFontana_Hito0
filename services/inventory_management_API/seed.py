@@ -4,8 +4,8 @@ from database import engine
 from models import Ingredient, IngredientEntry, IngredientExit
 
 
-# 1) Creá primero un usuario desde POST /auth/register.
-# 2) Copiá el uuid que devuelve Swagger y pegalo acá.
+# 1) Crea primero un usuario desde POST /users en JWTauth.
+# 2) Copia su id numerico y guardalo como texto en USER_UUID.
 USER_UUID = "1"
 
 
