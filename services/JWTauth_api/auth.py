@@ -45,6 +45,7 @@ class LoginPayload(BaseModel):
 	@field_validator("email")
 	@classmethod
 	def validate_email(cls, value: str) -> str:
+		value = value.strip()
 		if not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", value):
 			raise ValueError("Invalid email format")
 		return value
@@ -57,6 +58,7 @@ class LoginFormPayload(BaseModel):
 	@field_validator("username")
 	@classmethod
 	def validate_username(cls, value: str) -> str:
+		value = value.strip()
 		if not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", value):
 			raise ValueError("Invalid email format")
 		return value
@@ -68,6 +70,7 @@ class ForgotPasswordPayload(BaseModel):
 	@field_validator("email")
 	@classmethod
 	def validate_email(cls, value: str) -> str:
+		value = value.strip()
 		if not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", value):
 			raise ValueError("Invalid email format")
 		return value
