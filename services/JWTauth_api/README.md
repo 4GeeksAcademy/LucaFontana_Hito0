@@ -17,5 +17,6 @@ Copia `.env.example` a `.env` y completa los valores. Nunca guardes una API key 
 Corre en el puerto **8001** para no chocar con `suppliers_api` / `services/api`, que usan el 8000:
 
 ```bash
-uvicorn main:app --reload --port 8001
+uv sync
+uv run uvicorn main:app --reload --port 8001
 ```
