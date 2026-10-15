@@ -1,4 +1,21 @@
 const backendBaseUrl = process.env.AUTH_API_BASE_URL ?? "http://127.0.0.1:8001";
+const authEndpoints = new Set([
+  "login",
+  "me",
+  "forgot-password",
+  "reset-password",
+  "change-password",
+]);
+const rootEndpoints = new Set(["users", "profiles/me"]);
+
+function resolveBackendPath(path: string[]): string | null {
+  const normalizedPath = path[0] === "auth" ? path.slice(1) : path;
+  const endpoint = normalizedPath.join("/");
+
+  if (authEndpoints.has(endpoint)) return `/auth/${endpoint}`;
+  if (rootEndpoints.has(endpoint)) return `/${endpoint}`;
+  return null;
+}
 
 const forwardedHeaders = (request: Request) => {
   const headers = new Headers();
@@ -14,8 +31,13 @@ const forwardedHeaders = (request: Request) => {
 };
 
 async function proxyAuthRequest(request: Request, path: string[]) {
+  const backendPath = resolveBackendPath(path);
+  if (!backendPath) {
+    return Response.json({ detail: "Ruta de autenticación no encontrada." }, { status: 404 });
+  }
+
   const incomingUrl = new URL(request.url);
-  const targetUrl = new URL(`${backendBaseUrl.replace(/\/+$/, "")}/auth/${path.join("/")}`);
+  const targetUrl = new URL(`${backendBaseUrl.replace(/\/+$/, "")}${backendPath}`);
   targetUrl.search = incomingUrl.search;
 
   try {
