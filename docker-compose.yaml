@@ -1,0 +1,103 @@
+services:
+  interfaces:
+    build:
+      context: ./uis
+      dockerfile: Dockerfile
+
+    ports:
+      - "3000:3000"
+      - "3001:3001"
+      - "3002:3002"
+      - "3003:3003"
+      - "3004:3004"
+
+    env_file:
+      - .env
+
+    volumes:
+      - ./uis:/app
+      - website_node_modules:/app/website/node_modules
+      - backoffice_node_modules:/app/backoffices/administrar_inventario/node_modules
+      - incidents_node_modules:/app/backoffices/administrar_incidentes/node_modules
+      - analyzer_node_modules:/app/backoffices/analizador_incidentes/node_modules
+      - suppliers_node_modules:/app/backoffices/suppliers_tinydb/node_modules
+
+    command: ["sh", "/app/start.sh"]
+
+    depends_on:
+      - inventory
+      - inventory-db
+      - auth
+
+    networks:
+      - company_network
+
+
+  inventory:
+    build:
+      context: .
+      dockerfile: services/Dockerfile
+      target: inventory
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+psycopg2://inventory:inventory_dev@inventory-db:5432/inventory
+      JWT_SECRET: ${JWT_SECRET:?Define JWT_SECRET antes de iniciar Compose}
+    volumes:
+      - auth-data:/app/services/JWTauth_api/data
+    depends_on:
+      inventory-db:
+        condition: service_healthy
+
+  auth:
+    build:
+      context: .
+      dockerfile: services/Dockerfile
+      target: auth
+    ports:
+      - "8001:8000"
+    environment:
+      JWT_SECRET: ${JWT_SECRET:?Define JWT_SECRET antes de iniciar Compose}
+    volumes:
+      - auth-data:/app/services/JWTauth_api/data
+
+  incidents:
+    build:
+      context: .
+      dockerfile: services/Dockerfile
+      target: incidents
+    ports:
+      - "8002:8000"
+    environment:
+      INCIDENTS_DB_PATH: /data/incidents.json
+    volumes:
+      - incidents-data:/data
+
+  inventory-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: inventory
+      POSTGRES_PASSWORD: inventory_dev
+      POSTGRES_DB: inventory
+    volumes:
+      - inventory-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U inventory -d inventory"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  inventory-data:
+  auth-data:
+  website_node_modules:
+  backoffice_node_modules:
+  incidents_node_modules:
+  analyzer_node_modules:
+  suppliers_node_modules:
+  incidents-data:
+
+networks:
+  company_network:
+    name: company_network
+    driver: bridge

@@ -1,0 +1,17 @@
+.git
+**/.env
+**/.env.*
+**/myenv
+**/.venv
+**/venv
+**/node_modules
+**/__pycache__
+**/*.pyc
+**/.pytest_cache
+**/.next
+**/coverage
+**/*.db
+**/*.sqlite*
+services/JWTauth_api/data/
+services/manage_incidentsAPI/incidents.json
+uis/
