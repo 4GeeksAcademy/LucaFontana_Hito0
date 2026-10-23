@@ -2,6 +2,8 @@
 
 import { startTransition, useDeferredValue, useEffect, useMemo, useState } from "react";
 import { getStoredToken } from "@shared/auth";
+import { SupplierCategoryList } from "@/components/SupplierCategoryList";
+import { SupplierIdentity } from "@/components/SupplierIdentity";
 import {
   CATEGORY_LABELS,
   CATEGORY_OPTIONS,
@@ -479,7 +481,8 @@ export function SuppliersDashboard({ apiBaseUrl }: SuppliersDashboardProps) {
                   </FieldShell>
                 </div>
 
-                <FieldShell label="Categorías" error={formErrors.categories}>
+                <fieldset className="flex flex-col gap-2 text-sm text-zinc-300">
+                  <legend className="font-medium text-zinc-200">Categorías</legend>
                   <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                     {CATEGORY_OPTIONS.map((category) => {
                       const isChecked = formState.categories.includes(category);
@@ -505,7 +508,8 @@ export function SuppliersDashboard({ apiBaseUrl }: SuppliersDashboardProps) {
                       );
                     })}
                   </div>
-                </FieldShell>
+                  {formErrors.categories ? <span className="text-xs text-rose-300">{formErrors.categories}</span> : null}
+                </fieldset>
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <FieldShell label="Tarifa por unidad" error={formErrors.rate_per_unit}>
@@ -692,14 +696,11 @@ export function SuppliersDashboard({ apiBaseUrl }: SuppliersDashboardProps) {
                   return (
                     <article key={supplier.id} className="space-y-4 px-5 py-5 sm:px-6">
                       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                        <div className="space-y-2">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <h3 className="text-lg font-semibold text-white">{supplier.name}</h3>
+                        <SupplierIdentity supplier={supplier} compact>
+                          <>
                             <StatusBadge status={supplier.status} />
-                          </div>
-                          <p className="text-xs text-zinc-500">ID #{supplier.id}</p>
-                          {supplier.contact_email ? <p className="text-sm text-zinc-400">{supplier.contact_email}</p> : null}
-                        </div>
+                          </>
+                        </SupplierIdentity>
 
                         <span className="inline-flex w-fit rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-medium text-zinc-200">
                           {supplier.country}
@@ -708,16 +709,7 @@ export function SuppliersDashboard({ apiBaseUrl }: SuppliersDashboardProps) {
 
                       <div className="grid gap-4 sm:grid-cols-2">
                         <InfoBlock label="Categorías">
-                          <div className="flex flex-wrap gap-2">
-                            {supplier.categories.map((category) => (
-                              <span
-                                key={category}
-                                className="inline-flex rounded-full border border-[var(--brand)]/18 bg-[var(--brand)]/10 px-2.5 py-1 text-xs font-medium text-[var(--brand-soft)]"
-                              >
-                                {CATEGORY_LABELS[category]}
-                              </span>
-                            ))}
-                          </div>
+                          <SupplierCategoryList categories={supplier.categories} />
                         </InfoBlock>
 
                         <InfoBlock label="Tarifa">
@@ -780,13 +772,7 @@ export function SuppliersDashboard({ apiBaseUrl }: SuppliersDashboardProps) {
                       return (
                         <tr key={supplier.id} className="border-t border-white/6 align-top transition hover:bg-white/[0.02]">
                           <td className="px-5 py-5 sm:px-6">
-                            <div className="space-y-1.5">
-                              <p className="font-semibold text-white">{supplier.name}</p>
-                              <p className="text-xs text-zinc-500">ID #{supplier.id}</p>
-                              {supplier.contact_email ? (
-                                <p className="text-xs text-zinc-400">{supplier.contact_email}</p>
-                              ) : null}
-                            </div>
+                            <SupplierIdentity supplier={supplier} />
                           </td>
 
                           <td className="px-5 py-5">
@@ -796,16 +782,7 @@ export function SuppliersDashboard({ apiBaseUrl }: SuppliersDashboardProps) {
                           </td>
 
                           <td className="px-5 py-5">
-                            <div className="flex max-w-[260px] flex-wrap gap-2">
-                              {supplier.categories.map((category) => (
-                                <span
-                                  key={category}
-                                  className="inline-flex rounded-full border border-[var(--brand)]/18 bg-[var(--brand)]/10 px-2.5 py-1 text-xs font-medium text-[var(--brand-soft)]"
-                                >
-                                  {CATEGORY_LABELS[category]}
-                                </span>
-                              ))}
-                            </div>
+                            <SupplierCategoryList categories={supplier.categories} compact />
                           </td>
 
                           <td className="px-5 py-5">
@@ -1121,6 +1098,7 @@ function SupplierQuickActions({
             type="number"
             step="0.01"
             min="0"
+            aria-label={`Tarifa por unidad para ${supplier.name}`}
             value={currentRateDraft}
             onChange={(event) => onRateDraftChange(event.target.value)}
             className="h-9 w-28 rounded-lg border border-transparent bg-transparent px-3 text-sm text-white focus:border-[var(--brand)]/30 focus:bg-white/[0.03]"

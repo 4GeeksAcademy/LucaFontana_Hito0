@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { startTransition, useDeferredValue, useEffect, useState } from "react";
+import { startTransition, useDeferredValue, useState } from "react";
 import { AsyncNotice } from "@/components/AsyncNotice";
 import { CandidateBadge } from "@/components/Badge";
 import { CandidateForm } from "@/components/CandidateForm";
+import { DashboardShell } from "@/components/DashboardShell";
 import { Modal } from "@/components/Modal";
 import { useCandidates } from "@/context/CandidateContext";
 import {
@@ -21,23 +22,17 @@ export function CandidatesDashboard() {
     candidates,
     listState,
     createState,
-    fetchCandidates,
     createCandidate,
   } = useCandidates();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [search, setSearch] = useState("");
   const deferredSearch = useDeferredValue(search);
+  const isListLoading = listState.status === "idle" || listState.status === "loading";
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const statusFilter = searchParams.get("status") as CandidateStatus | null;
   const stageFilter = searchParams.get("stage") as CandidateStage | null;
-
-  useEffect(() => {
-    if (listState.status === "idle") {
-      void fetchCandidates();
-    }
-  }, [fetchCandidates, listState.status]);
 
   const updateFilterParam = (key: "status" | "stage", value: string) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -74,8 +69,8 @@ export function CandidatesDashboard() {
   };
 
   return (
-    <main className="flex-1 bg-[var(--color-dark)] text-zinc-50">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
+    <>
+      <DashboardShell>
         <header className="overflow-hidden rounded-[2rem] border border-white/8 bg-[linear-gradient(135deg,rgba(249,115,22,0.16),rgba(20,20,20,0.94)_35%,rgba(10,10,10,1)_100%)] p-6 shadow-[0_24px_80px_rgba(0,0,0,0.45)] sm:p-8">
           <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl space-y-4">
@@ -167,7 +162,7 @@ export function CandidatesDashboard() {
           </div>
         </section>
 
-        <AsyncNotice state={listState} />
+        {!isListLoading ? <AsyncNotice state={listState} /> : null}
         <AsyncNotice state={createState} />
 
         <section className="overflow-hidden rounded-[1.75rem] border border-white/8 bg-[var(--color-dark-card)]/92 shadow-[0_16px_48px_rgba(0,0,0,0.35)]">
@@ -179,7 +174,10 @@ export function CandidatesDashboard() {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-white/6">
+            <p className="sr-only" role="status">
+              {isListLoading ? "Cargando candidaturas..." : ""}
+            </p>
+            <table aria-busy={isListLoading} className="min-w-full divide-y divide-white/6">
               <thead className="bg-white/[0.02] text-left text-xs uppercase tracking-[0.2em] text-zinc-500">
                 <tr>
                   <th scope="col" className="px-5 py-4 font-medium">Candidato</th>
@@ -191,7 +189,21 @@ export function CandidatesDashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/6 text-sm text-zinc-200">
-                {visibleCandidates.map((candidate) => (
+                {isListLoading
+                  ? Array.from({ length: 6 }, (_, index) => (
+                      <tr key={`loading-${index}`} aria-hidden="true">
+                        <td className="px-5 py-4">
+                          <div className="h-4 w-36 animate-pulse rounded bg-white/10" />
+                          <div className="mt-2 h-3 w-44 animate-pulse rounded bg-white/5" />
+                        </td>
+                        <td className="px-5 py-4"><div className="h-4 w-28 animate-pulse rounded bg-white/10" /></td>
+                        <td className="px-5 py-4"><div className="h-6 w-20 animate-pulse rounded-full bg-white/10" /></td>
+                        <td className="px-5 py-4"><div className="h-6 w-24 animate-pulse rounded-full bg-white/10" /></td>
+                        <td className="px-5 py-4"><div className="h-4 w-6 animate-pulse rounded bg-white/10" /></td>
+                        <td className="px-5 py-4 text-right"><div className="ml-auto h-8 w-20 animate-pulse rounded-full bg-white/10" /></td>
+                      </tr>
+                    ))
+                  : visibleCandidates.map((candidate) => (
                   <tr key={candidate.id} className="transition hover:bg-white/[0.02]">
                     <td className="px-5 py-4 align-top">
                       <div className="space-y-1">
@@ -217,7 +229,7 @@ export function CandidatesDashboard() {
                     </td>
                   </tr>
                 ))}
-                {visibleCandidates.length === 0 && listState.status !== "loading" ? (
+                {!isListLoading && visibleCandidates.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="px-5 py-14 text-center text-sm text-zinc-400">
                       No hay candidaturas que coincidan con los filtros actuales.
@@ -228,7 +240,7 @@ export function CandidatesDashboard() {
             </table>
           </div>
         </section>
-      </div>
+      </DashboardShell>
 
       <Modal
         open={isCreateOpen}
@@ -244,7 +256,7 @@ export function CandidatesDashboard() {
           onSubmit={handleCreate}
         />
       </Modal>
-    </main>
+    </>
   );
 }
 
