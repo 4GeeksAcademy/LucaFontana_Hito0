@@ -1,4 +1,4 @@
-const backendBaseUrl = process.env.INVENTORY_API_BASE_URL ?? "https://fuzzy-space-computing-machine-5g4qpxv57495cv6vx-8000.app.github.dev";
+const backendBaseUrl = process.env.INVENTORY_API_BASE_URL ?? "http://127.0.0.1:8000";
 
 function isAllowedEndpoint(path: string[]): boolean {
   const endpoint = path.join("/");

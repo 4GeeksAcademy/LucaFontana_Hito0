@@ -50,15 +50,15 @@ export function BackofficeShell({ children }: { children: ReactNode }) {
             </span>
             <span>
               <span className="block font-[var(--font-display)] text-lg font-bold leading-5">Brasaland</span>
-              <span className="mt-1 block text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">Control de inventario</span>
+              <span className="mt-1 block text-[10px] font-semibold uppercase tracking-[0.18em] text-white/65">Control de inventario</span>
             </span>
           </Link>
-          <p className="mb-2 px-3 text-[10px] font-bold uppercase tracking-[0.16em] text-white/35">Operación</p>
+          <p className="mb-2 px-3 text-[10px] font-bold uppercase tracking-[0.16em] text-white/65">Operación</p>
           <nav className="flex flex-col gap-1" aria-label="Navegación de inventario">
             <NavigationLinks />
           </nav>
           <div className="mt-auto border-t border-white/[0.07] pt-4">
-            <p className="truncate px-3 text-xs text-white/45" title={user?.email}>{user?.email}</p>
+            <p className="truncate px-3 text-xs text-white/65" title={user?.email}>{user?.email}</p>
             <button
               type="button"
               onClick={logout}
@@ -78,7 +78,7 @@ export function BackofficeShell({ children }: { children: ReactNode }) {
               <span className="text-white/30">/</span>
               <span>Inventario</span>
             </div>
-            <div className="hidden text-xs font-semibold uppercase tracking-[0.12em] text-white/40 lg:block">
+            <div className="hidden text-xs font-semibold uppercase tracking-[0.12em] text-white/65 lg:block">
               Gestión de existencias
             </div>
             <div className="ml-auto flex items-center gap-3">

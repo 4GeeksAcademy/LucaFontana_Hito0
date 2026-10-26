@@ -5,6 +5,8 @@
 - talent-pipeline-tracker — Inicio: Performance +4; CLS mejoró; SEO sin cambios.
 - administrar_incidentes — Inicio: Accessibility +11; Performance sin cambios; SEO sin cambios.
 - suppliers_tinydb — Inicio: Accessibility +6; Performance +1; SEO sin cambios.
+- analizador_incidentes — Incidencias: CLS −0,598; Performance +23; Accessibility +5.
+- administrar_inventario — Productos: Accessibility +4; CLS −0,017; Performance +2.
 
 ---
 
@@ -206,3 +208,112 @@ Capturas después: ![Lighthouse después 1](./after/suppliers_tinydb-home-after-
 - **Speed Index:** bajó 0,2 s (1,1 a 0,9 s); es una mejora pequeña de una sola medición y puede estar dentro de la variabilidad entre ejecuciones.
 - **Sin cambio:** Best Practices se mantuvo en 100; SEO siguió en 60 por el bloqueo de indexación mostrado por Lighthouse, que se conserva porque se trata de un backoffice autenticado. TTFB e INP no se mostraron.
 - **Próximos pasos:** no se justifica una optimización de carga con estas métricas. Si se busca otra iteración, medir una sesión con volumen de datos representativo y probar manualmente los nombres/agrupaciones con tecnología asistiva. Confirmar SEO solo en un host público si la aplicación tuviera que indexarse.
+
+---
+
+## analizador_incidentes — Incidencias (`https://fuzzy-space-computing-machine-5g4qpxv57495cv6vx-3000.app.github.dev/incidents`)
+
+Condiciones: escritorio; build de producción iniciado con `npm run start`; ruta autenticada `/incidents` con dependencia de `/services/JWTauth_api`, según la línea base. La captura posterior advierte de datos almacenados en IndexedDB que podrían afectar la carga; por ello, la comparación requiere cautela y se recomienda una medición de confirmación en incógnito.
+
+### 1. Correcciones aplicadas
+
+- **Qué se cambió:** se configuró `display: "optional"` para Inter y Poppins en [layout.tsx](../uis/backoffices/analizador_incidentes/app/layout.tsx).
+  - **Causa que resuelve:** intercambio de fuente señalado por Lighthouse como causa principal del CLS (problema 1 de [AUDIT.md](./AUDIT.md)).
+  - **Métrica objetivo:** CLS y Performance.
+  - **Impacto observado:** CLS bajó de 0,649 a 0,051 (−0,598, aproximadamente un 92% menos); Performance subió de 76 a 99 (+23). El resultado es consistente con el objetivo de la corrección, aunque la advertencia de IndexedDB limita la certeza causal.
+
+- **Qué se cambió:** se oscurecieron los colores de fondo en reposo y hover del botón “Analizar incidencias” en [IncidentAnalyzer.tsx](../uis/backoffices/analizador_incidentes/components/IncidentAnalyzer.tsx).
+  - **Causa que resuelve:** contraste insuficiente entre el texto blanco y el fondo naranja señalado por Lighthouse (problema 2 de [AUDIT.md](./AUDIT.md)).
+  - **Métrica objetivo:** Accessibility.
+  - **Impacto observado:** Accessibility subió de 95 a 100 (+5); el aumento coincide con la corrección, aunque debe confirmarse con una revisión de accesibilidad completa.
+
+- **Qué se cambió:** se extrajeron `PercentageBar` y `AnalysisMetricCard` en [PercentageBar.tsx](../uis/backoffices/analizador_incidentes/components/PercentageBar.tsx) y [AnalysisMetricCard.tsx](../uis/backoffices/analizador_incidentes/components/AnalysisMetricCard.tsx), integrados en [IncidentAnalyzer.tsx](../uis/backoffices/analizador_incidentes/components/IncidentAnalyzer.tsx).
+  - **Causa que resuelve:** duplicación de markup para barras porcentuales y tarjetas métricas.
+  - **Métrica objetivo:** mantenibilidad; no se esperaba mejora directa de Lighthouse.
+  - **Impacto observado:** no se atribuyen cambios de métricas a estos refactors.
+
+### 2. Comparativa antes / después
+| Categoría / métrica | Antes | Después | Diferencia |
+|---|---:|---:|---:|
+| Performance | 76 | 99 | +23 |
+| Accessibility | 95 | 100 | +5 |
+| Best Practices | 100 | 100 | 0 |
+| SEO | 60 | 60 | 0 |
+| TTFB | No disponible | No disponible | No evaluable |
+| FCP | 0,4 s | 0,4 s | 0 |
+| LCP | 0,7 s | 0,7 s | 0 |
+| CLS | 0,649 | 0,051 | −0,598 |
+| TBT | 0 ms | 0 ms | 0 |
+| INP | No disponible | No disponible | No evaluable |
+| Speed Index | 1,3 s | 0,9 s | −0,4 s |
+
+Capturas antes: ![Lighthouse antes 1](./before/analizador_incidentes-incidents-before-1.png) ![Lighthouse antes 2](./before/analizador_incidentes-incidents-before-2.png) ![Lighthouse antes 3](./before/analizador_incidentes-incidents-before-3.png) ![Lighthouse antes 4](./before/analizador_incidentes-incidents-before-4.png) ![Lighthouse antes 5](./before/analizador_incidentes-incidents-before-5.png) ![Lighthouse antes 6](./before/analizador_incidentes-incidents-before-6.png) ![Lighthouse antes 7](./before/analizador_incidentes-incidents-before-7.png) ![Lighthouse antes 8](./before/analizador_incidentes-incidents-before-8.png)
+
+Capturas después: ![Lighthouse después 1](./after/analizador_incidentes-incidents-after-1.png) ![Lighthouse después 2](./after/analizador_incidentes-incidents-after-2.png) ![Lighthouse después 3](./after/analizador_incidentes-incidents-after-3.png) ![Lighthouse después 4](./after/analizador_incidentes-incidents-after-4.png) ![Lighthouse después 5](./after/analizador_incidentes-incidents-after-5.png)
+
+Diagnóstico complementario de la ruta crítica: latencia crítica máxima de 1.086 ms antes y 628 ms después (−458 ms), con duración de bloqueo del CSS de 0 ms en ambas mediciones. TTFB no se informó, así que no se interpreta esta diferencia como mejora de TTFB.
+
+### 3. Refactorizaciones realizadas
+- `PercentageBar` reutiliza el track y el ancho porcentual acotado de los gráficos de satisfacción y categorías; mantiene el gradiente específico de cada uno.
+- `AnalysisMetricCard` reutiliza las tarjetas de métricas completas y compactas sin cambiar las variantes visuales.
+- ESLint enfocado, `npx tsc --noEmit` y `npm run build` pasaron después de los cambios. No se ejecutó Lighthouse desde el entorno de desarrollo; las métricas posteriores fueron proporcionadas por el usuario.
+
+### 4. Valoración
+- **Mayor impacto:** el cambio de estrategia de fuentes coincide con la caída de CLS de 0,649 a 0,051 (−0,598), que explica probablemente la mayor parte de los 23 puntos adicionales de Performance. LCP y FCP se mantuvieron, así que la mejora observada se concentra en estabilidad visual.
+- **Accesibilidad:** la puntuación aumentó 5 puntos, de 95 a 100, en línea con el ajuste de contraste del botón.
+- **Sin cambio:** Best Practices quedó en 100, SEO en 60, LCP en 0,7 s y TBT en 0 ms. No se aportó INP ni TTFB. La advertencia de `noindex, nofollow` es coherente con una herramienta interna autenticada.
+- **Cautela de medición:** la ejecución posterior advierte de datos IndexedDB que podrían afectar la carga y recomienda incógnito. Por eso, aunque las diferencias de CLS y puntuación son grandes y consistentes con los cambios, deben confirmarse con una ejecución limpia. Las extensiones de Chrome siguen apareciendo en los diagnósticos de JavaScript; Lighthouse estima 14 KiB de JavaScript legado y alrededor de 135 KiB de JavaScript no usado, incluyendo scripts ajenos a la app. No se propone cambiar el bundle con esta evidencia.
+- **Próximos pasos:** repetir Lighthouse en una ventana de incógnito, conservando URL, modo escritorio, login y disponibilidad del backend; verificar si persisten el CLS cercano a 0,05 y Accessibility 100. No se recomienda una nueva optimización de carga antes de confirmar la medición.
+
+---
+
+## administrar_inventario — Productos (`https://fuzzy-space-computing-machine-5g4qpxv57495cv6vx-3000.app.github.dev/backoffice/inventory/products`)
+
+Condiciones: escritorio, build de producción ejecutado con `npm run build` y servido mediante `npm run start`; acceso autenticado y base de datos/API disponibles, según lo informado para la línea base. No se reportaron cambios de URL ni de condiciones.
+
+### 1. Correcciones aplicadas
+
+- **Qué se cambió:** la tabla muestra ocho filas placeholder con alturas estables mientras carga el catálogo y comunica la carga mediante `aria-busy` en [InventoryPages.tsx](../uis/backoffices/administrar_inventario/components/InventoryPages.tsx).
+  - **Causa que resuelve:** el reemplazo de una única fila de carga por las filas de productos podía desplazar el texto informativo bajo la tabla (problema 1 de [AUDIT.md](./AUDIT.md)).
+  - **Métrica objetivo:** CLS.
+  - **Impacto observado:** CLS bajó de 0,02 a 0,003 (−0,017). La variación coincide con la corrección, pero el desplazamiento inicial ya era bajo y no se puede aislar la contribución exacta de esta modificación.
+
+- **Qué se cambió:** se aumentó el contraste de los textos de navegación, metadatos, cabeceras y aviso del catálogo en [BackofficeShell.tsx](../uis/backoffices/administrar_inventario/components/BackofficeShell.tsx) y [InventoryPages.tsx](../uis/backoffices/administrar_inventario/components/InventoryPages.tsx).
+  - **Causa que resuelve:** textos de baja opacidad señalados por Lighthouse como insuficientes en contraste (problema 2 de [AUDIT.md](./AUDIT.md)).
+  - **Métrica objetivo:** Accessibility.
+  - **Impacto observado:** Accessibility aumentó de 96 a 100 (+4); el cambio es consistente con la corrección de contraste. La captura posterior no incluye el detalle de auditoría de accesibilidad para confirmar individualmente cada elemento.
+
+### 2. Comparativa antes / después
+| Categoría / métrica | Antes | Después | Diferencia |
+|---|---:|---:|---:|
+| Performance | 97 | 99 | +2 |
+| Accessibility | 96 | 100 | +4 |
+| Best Practices | 100 | 100 | 0 |
+| SEO | 60 | 60 | 0 |
+| TTFB | 0,32 s* | No disponible | No evaluable |
+| FCP | 0,4 s | 0,4 s | 0 |
+| LCP | 0,6 s | 0,6 s | 0 |
+| CLS | 0,02 | 0,003 | −0,017 |
+| TBT | 0 ms | 0 ms | 0 |
+| INP | No disponible | No disponible | No evaluable |
+| Speed Index | 1,9 s | 1,0 s | −0,9 s |
+
+*El TTFB anterior (320 ms) solo aparece en el desglose LCP, cuya duración de renderizado de 2.040 ms contradice el LCP resumido de 0,6 s. No se usa para extraer conclusiones de antes/después.
+
+Capturas antes: ![Lighthouse antes 1](./before/administrar_inventario-products-before-1.png) ![Lighthouse antes 2](./before/administrar_inventario-products-before-2.png) ![Lighthouse antes 3](./before/administrar_inventario-products-before-3.png) ![Lighthouse antes 4](./before/administrar_inventario-products-before-4.png) ![Lighthouse antes 5](./before/administrar_inventario-products-before-5.png) ![Lighthouse antes 6](./before/administrar_inventario-products-before-6.png) ![Lighthouse antes 7](./before/administrar_inventario-products-before-7.png) ![Lighthouse antes 8](./before/administrar_inventario-products-before-8.png) ![Lighthouse antes 9](./before/administrar_inventario-products-before-9.png) ![Lighthouse antes 10](./before/administrar_inventario-products-before-10.png)
+
+Capturas después: ![Lighthouse después 1](./after/administrar_inventario-products-after-1.png) ![Lighthouse después 2](./after/administrar_inventario-products-after-2.png) ![Lighthouse después 3](./after/administrar_inventario-products-after-3.png) ![Lighthouse después 4](./after/administrar_inventario-products-after-4.png)
+
+Diagnóstico de ruta crítica: la latencia crítica máxima pasó de 601 ms a 654 ms (+53 ms). El CSS sigue con una duración de bloqueo de 0 ms y Lighthouse no encuentra candidatos de `preconnect`; por ello, no se atribuye este aumento a una regresión del código.
+
+### 3. Refactorizaciones realizadas
+- No se añadió una nueva extracción para esta página: `PageHeading` ya comparte el encabezado entre rutas y `useProducts` centraliza la carga de catálogo para la página y los formularios de movimientos.
+- La validación de ESLint, TypeScript y build está registrada en [AUDIT.md](./AUDIT.md). No se ejecutó Lighthouse desde el agente.
+
+### 4. Valoración
+- **Mayor impacto:** Accessibility subió 4 puntos hasta 100, de forma coherente con el aumento de contraste de los textos señalados.
+- **CLS:** bajó de 0,02 a 0,003 (−0,017). La diferencia apunta en la dirección esperada por los placeholders, aunque el valor inicial era bajo y hace falta repetir mediciones para valorar la estabilidad.
+- **Performance y Speed Index:** Performance pasó de 97 a 99 y Speed Index mejoró 0,9 s, mientras FCP, LCP y TBT permanecieron iguales. No se atribuye con certeza la mejora de Performance ni Speed Index a estos cambios; puede haber variación entre ejecuciones.
+- **Sin cambio:** Best Practices se mantuvo en 100 y SEO en 60; el bloqueo de indexación es adecuado para el backoffice autenticado. LCP se mantuvo en 0,6 s.
+- **Diagnósticos:** la latencia crítica subió 53 ms, pero el CSS continúa con 0 ms de bloqueo y no hay orígenes candidatos de `preconnect`. El diagnóstico de 14 KiB de JavaScript legado persiste; sin evidencia de tarea lenta (TBT 0 ms) no se justifica cambiar el bundle.
+- **Próximos pasos:** comparar con una segunda ejecución bajo las mismas condiciones y el mismo volumen de productos. Si CLS vuelve a subir, confirmar que ocho filas placeholder corresponden al volumen observado; revisar de nuevo los elementos de contraste si Lighthouse sigue detectando fallos.

@@ -167,15 +167,15 @@ export function ProductsPage() {
       />
 
       {error ? <Notice tone="error">{error}</Notice> : null}
-      <div className="mb-3 flex items-center justify-between gap-4 text-xs text-white/45">
+      <div className="mb-3 flex items-center justify-between gap-4 text-xs text-white/65">
         <span>{loading ? "Consultando catálogo…" : `${products.length} productos`}</span>
         <span>Stock actual calculado</span>
       </div>
 
       <div className="overflow-hidden border-y border-white/[0.09]">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[880px] border-collapse text-left text-sm">
-            <thead className="bg-white/[0.025] text-[10px] font-bold uppercase tracking-[0.13em] text-white/40">
+          <table aria-busy={loading} className="w-full min-w-[880px] border-collapse text-left text-sm">
+            <thead className="bg-white/[0.025] text-[10px] font-bold uppercase tracking-[0.13em] text-white/65">
               <tr>
                 <th scope="col" className="px-4 py-3">Producto</th>
                 <th scope="col" className="px-4 py-3">SKU</th>
@@ -188,14 +188,24 @@ export function ProductsPage() {
             </thead>
             <tbody className="divide-y divide-white/[0.06]">
               {loading ? (
-                <tr><td colSpan={7} className="px-4 py-12 text-center text-white/45">Cargando productos…</td></tr>
+                Array.from({ length: 8 }, (_, index) => (
+                  <tr key={`loading-product-${index}`} aria-hidden="true" className="border-b border-white/[0.06]">
+                    <td className="px-4 py-4"><span className="block h-4 w-32 rounded bg-white/[0.08]" /><span className="mt-2 block h-3 w-24 rounded bg-white/[0.06]" /></td>
+                    <td className="px-4 py-4"><span className="block h-3 w-20 rounded bg-white/[0.06]" /></td>
+                    <td className="px-4 py-4"><span className="block h-3 w-24 rounded bg-white/[0.06]" /></td>
+                    <td className="px-4 py-4"><span className="block h-3 w-16 rounded bg-white/[0.06]" /></td>
+                    <td className="px-4 py-4"><span className="block h-4 w-12 rounded bg-white/[0.08]" /></td>
+                    <td className="px-4 py-4"><span className="block h-6 w-20 rounded bg-white/[0.06]" /></td>
+                    <td className="px-4 py-4"><span className="ml-auto block h-9 w-28 rounded bg-white/[0.06]" /></td>
+                  </tr>
+                ))
               ) : products.length === 0 ? (
                 <tr><td colSpan={7} className="px-4 py-14 text-center text-white/45">{error ? "No se pudo mostrar el catálogo." : "No hay productos registrados."}</td></tr>
               ) : products.map((product) => (
                 <tr key={product.id} className="transition hover:bg-white/[0.025]">
                   <td className="px-4 py-4">
                     <span className="block font-semibold text-white/90">{product.name}</span>
-                    <span className="mt-1 block text-xs text-white/40">{product.country} · {product.unit}</span>
+                    <span className="mt-1 block text-xs text-white/65">{product.country} · {product.unit}</span>
                   </td>
                   <td className="px-4 py-4 font-mono text-xs text-white/55">{product.sku}</td>
                   <td className="px-4 py-4 capitalize text-white/65">{product.category}</td>
@@ -230,7 +240,7 @@ export function ProductsPage() {
           </table>
         </div>
       </div>
-      <p className="mt-4 text-xs leading-5 text-white/35">Los niveles son una referencia visual por unidad de producto y no sustituyen el control de compra.</p>
+      <p className="mt-4 text-xs leading-5 text-white/65">Los niveles son una referencia visual por unidad de producto y no sustituyen el control de compra.</p>
     </>
   );
 }

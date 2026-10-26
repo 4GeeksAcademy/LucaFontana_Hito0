@@ -32,6 +32,9 @@ export type AuthApiClient = ReturnType<typeof createAuthApiClient>;
  */
 export function createAuthApiClient(baseUrl: string, onUnauthorized: () => void) {
   const normalizedBaseUrl = baseUrl.replace(/\/+$/, "");
+  // The Next.js proxy is already mounted at /api/auth, so avoid /api/auth/auth/*.
+  const isAuthProxy = normalizedBaseUrl.endsWith("/api/auth");
+  const resolvePath = (path: string) => (isAuthProxy ? path.replace(/^\/auth(?=\/)/, "") : path);
 
   async function request(path: string, init: RequestInit = {}, requireAuth = true): Promise<Response> {
     const headers = new Headers(init.headers);
@@ -44,7 +47,7 @@ export function createAuthApiClient(baseUrl: string, onUnauthorized: () => void)
 
     let response: Response;
     try {
-      response = await fetch(`${normalizedBaseUrl}${path}`, { ...init, headers });
+      response = await fetch(`${normalizedBaseUrl}${resolvePath(path)}`, { ...init, headers });
     } catch {
       throw new Error(AUTH_SERVICE_ERROR_MESSAGE);
     }

@@ -2,6 +2,8 @@
 
 import { ChangeEvent, DragEvent, useRef, useState } from "react";
 
+import { AnalysisMetricCard } from "@/components/AnalysisMetricCard";
+import { PercentageBar } from "@/components/PercentageBar";
 import type { IncidentAnalysisResponse } from "@/types/incidents";
 
 const analyzeEndpoint = "/api/incidents/analyze";
@@ -47,10 +49,6 @@ async function safeParseJson(response: Response) {
   } catch {
     return null;
   }
-}
-
-function clampWidth(percentage: number) {
-  return `${Math.min(Math.max(percentage, 0), 100)}%`;
 }
 
 export function IncidentAnalyzer() {
@@ -224,7 +222,7 @@ export function IncidentAnalyzer() {
                 type="button"
                 onClick={handleAnalyze}
                 disabled={isSubmitting}
-                className="inline-flex items-center justify-center rounded-full bg-[#f97316] px-6 py-3 text-base font-bold text-white shadow-[0_16px_35px_rgba(249,115,22,0.32)] transition hover:bg-[#ea580c] disabled:cursor-wait disabled:opacity-70"
+                className="inline-flex items-center justify-center rounded-full bg-[#c2410c] px-6 py-3 text-base font-bold text-white shadow-[0_16px_35px_rgba(249,115,22,0.32)] transition hover:bg-[#9a3412] disabled:cursor-wait disabled:opacity-70"
               >
                 {isSubmitting ? "Analizando archivo..." : "Analizar incidencias"}
               </button>
@@ -321,16 +319,12 @@ export function IncidentAnalyzer() {
                   : analysis[metric.key];
 
               return (
-                <article
+                <AnalysisMetricCard
                   key={metric.key}
-                  className="rounded-[1.75rem] border border-white/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02))] px-5 py-6 shadow-[0_18px_40px_rgba(0,0,0,0.22)]"
-                >
-                  <p className="text-sm uppercase tracking-[0.24em] text-white/45">{metric.label}</p>
-                  <p className="mt-4 font-[family-name:var(--font-poppins)] text-4xl font-black text-white">
-                    {metricValue}
-                  </p>
-                  <p className="mt-3 text-sm leading-6 text-white/60">{metric.description}</p>
-                </article>
+                  label={metric.label}
+                  value={metricValue}
+                  description={metric.description}
+                />
               );
             })}
           </div>
@@ -374,24 +368,21 @@ export function IncidentAnalyzer() {
             <section className="rounded-[2rem] border border-white/8 bg-[#121212]/85 p-6 sm:p-8">
               <p className="text-sm uppercase tracking-[0.28em] text-[#fb923c]">Índice de satisfacción</p>
               <div className="mt-4 grid gap-4 sm:grid-cols-3">
-                <div className="rounded-[1.5rem] border border-white/8 bg-white/[0.03] p-4">
-                  <p className="text-xs uppercase tracking-[0.24em] text-white/40">Promedio</p>
-                  <p className="mt-3 font-[family-name:var(--font-poppins)] text-4xl font-black text-white">
-                    {analysis.satisfaction_index.average_score.toFixed(2)}
-                  </p>
-                </div>
-                <div className="rounded-[1.5rem] border border-white/8 bg-white/[0.03] p-4">
-                  <p className="text-xs uppercase tracking-[0.24em] text-white/40">Casos cerrados</p>
-                  <p className="mt-3 font-[family-name:var(--font-poppins)] text-4xl font-black text-white">
-                    {analysis.satisfaction_index.closed_cases}
-                  </p>
-                </div>
-                <div className="rounded-[1.5rem] border border-white/8 bg-white/[0.03] p-4">
-                  <p className="text-xs uppercase tracking-[0.24em] text-white/40">Casos puntuados</p>
-                  <p className="mt-3 font-[family-name:var(--font-poppins)] text-4xl font-black text-white">
-                    {analysis.satisfaction_index.scored_closed_cases}
-                  </p>
-                </div>
+                <AnalysisMetricCard
+                  label="Promedio"
+                  value={analysis.satisfaction_index.average_score.toFixed(2)}
+                  compact
+                />
+                <AnalysisMetricCard
+                  label="Casos cerrados"
+                  value={analysis.satisfaction_index.closed_cases}
+                  compact
+                />
+                <AnalysisMetricCard
+                  label="Casos puntuados"
+                  value={analysis.satisfaction_index.scored_closed_cases}
+                  compact
+                />
               </div>
 
               <div className="mt-6 space-y-4">
@@ -405,12 +396,7 @@ export function IncidentAnalyzer() {
                         {item.count} casos · {item.percentage.toFixed(1)}%
                       </span>
                     </div>
-                    <div className="h-3 overflow-hidden rounded-full bg-white/8">
-                      <div
-                        className="h-full rounded-full bg-[linear-gradient(90deg,#f97316,#fb923c)]"
-                        style={{ width: clampWidth(item.percentage) }}
-                      />
-                    </div>
+                    <PercentageBar percentage={item.percentage} />
                   </div>
                 ))}
               </div>
@@ -438,12 +424,11 @@ export function IncidentAnalyzer() {
                         {item.count} · {item.percentage.toFixed(1)}%
                       </p>
                     </div>
-                    <div className="mt-3 h-3 overflow-hidden rounded-full bg-white/8">
-                      <div
-                        className="h-full rounded-full bg-[linear-gradient(90deg,#f97316,#ffd6bf)]"
-                        style={{ width: clampWidth(item.percentage) }}
-                      />
-                    </div>
+                    <PercentageBar
+                      percentage={item.percentage}
+                      className="mt-3"
+                      fillClassName="bg-[linear-gradient(90deg,#f97316,#ffd6bf)]"
+                    />
                   </div>
                 ))}
               </div>
