@@ -1,3 +1,4 @@
+import os
 import sys
 from pathlib import Path
 
@@ -23,4 +24,5 @@ SQLModel.metadata.create_all(engine)
 app = FastAPI()
 
 app.include_router(inventory_router)
-app.include_router(auth_router)
+if os.getenv("ENABLE_AUTH_ROUTES", "true").lower() == "true":
+	app.include_router(auth_router)

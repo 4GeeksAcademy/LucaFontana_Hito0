@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 
@@ -39,4 +40,5 @@ def healthcheck() -> dict[str, str]:
 
 
 app.include_router(suppliers_router)
-app.include_router(auth_router)
+if os.getenv("ENABLE_AUTH_ROUTES", "true").lower() == "true":
+    app.include_router(auth_router)

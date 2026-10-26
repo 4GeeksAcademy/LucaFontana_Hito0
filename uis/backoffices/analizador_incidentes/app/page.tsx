@@ -23,7 +23,7 @@ export default function Home() {
               Abrir análisis de incidencias
             </Link>
             <a
-              href="http://127.0.0.1:8000/docs"
+              href="http://localhost:8100/docs"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-3 rounded-full border border-white/12 px-8 py-4 text-lg font-semibold text-white/80 transition hover:border-white/25 hover:text-white"

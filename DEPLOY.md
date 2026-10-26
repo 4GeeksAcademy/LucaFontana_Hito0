@@ -100,3 +100,7 @@ Por ejemplo:
 cd /workspaces/LucaFontana_Hito0/uis/backoffices/my-app
 INCIDENTS_API_BASE_URL=http://127.0.0.1:8000 npm run start
 ```
+
+## VPS DigitalOcean
+
+La configuracion de produccion, el acceso inicial por tunel SSH y la preparacion de GitHub Actions estan documentados en [DEPLOY_VPS.md](DEPLOY_VPS.md).

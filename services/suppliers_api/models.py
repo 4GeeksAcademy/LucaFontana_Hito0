@@ -65,9 +65,21 @@ class SupplierCreate(BaseModel):
         return self
 
 
-class Supplier(SupplierCreate):
+class SupplierResponse(BaseModel):
     id: int
+    name: str
+    country: Literal["Colombia", "USA"]
+    categories: list[str]
+    rate_per_unit: float
+    currency: Literal["COP", "USD"]
+    status: Literal["active", "suspended"]
     updated_at: datetime
+    contact_email: str | None = None
+    notes: str | None = None
+
+
+class HealthResponse(BaseModel):
+    status: str
 
 
 class SupplierRateUpdate(BaseModel):

@@ -105,6 +105,10 @@ class TokenResponse(BaseModel):
 	token_type: str = "bearer"
 
 
+class MessageResponse(BaseModel):
+	message: str
+
+
 class ProfileResponse(BaseModel):
 	id: int
 	user_id: int
@@ -258,8 +262,8 @@ async def login(form: OAuth2PasswordRequestForm = Depends()) -> TokenResponse:
 	return TokenResponse(access_token=create_access_token(user["id"]))
 
 
-@router.post("/forgot-password")
-async def forgot_password(payload: ForgotPasswordPayload) -> dict[str, str]:
+@router.post("/forgot-password", response_model=MessageResponse)
+async def forgot_password(payload: ForgotPasswordPayload) -> MessageResponse:
 	user = get_user_by_email(payload.email)
 	if user:
 		raw_token = secrets.token_urlsafe(32)
@@ -276,11 +280,11 @@ async def forgot_password(payload: ForgotPasswordPayload) -> dict[str, str]:
 		reset_url = f"{RESET_URL}?token={raw_token}"
 		_ = await _send_reset_email_safely(user["email"], reset_url)
 
-	return {"message": "If that email address is registered, you will receive a reset link shortly."}
+	return MessageResponse(message="If that email address is registered, you will receive a reset link shortly.")
 
 
-@router.post("/reset-password")
-def reset_password(payload: ResetPasswordPayload) -> dict[str, str]:
+@router.post("/reset-password", response_model=MessageResponse)
+def reset_password(payload: ResetPasswordPayload) -> MessageResponse:
 	query = Query()
 	token_doc = password_reset_tokens_table.get(query.token_hash == _token_hash(payload.token))
 	if token_doc is None or token_doc.get("used", False):
@@ -298,19 +302,19 @@ def reset_password(payload: ResetPasswordPayload) -> dict[str, str]:
 		raise HTTPException(status_code=400, detail="Invalid or expired reset token")
 
 	password_reset_tokens_table.update({"used": True}, doc_ids=[token_doc.doc_id])
-	return {"message": "Password updated successfully"}
+	return MessageResponse(message="Password updated successfully")
 
 
-@router.post("/change-password")
+@router.post("/change-password", response_model=MessageResponse)
 def change_password(
 	payload: ChangePasswordPayload,
 	current_user: dict[str, Any] = Depends(get_current_user),
-) -> dict[str, str]:
+) -> MessageResponse:
 	if not bcrypt.verify(payload.current_password, current_user["hashed_password"]):
 		raise HTTPException(status_code=400, detail="Current password is incorrect")
 	if update_password(current_user["id"], payload.new_password) is None:
 		raise HTTPException(status_code=400, detail="Could not update password")
-	return {"message": "Password updated successfully"}
+	return MessageResponse(message="Password updated successfully")
 
 
 @router.get("/me", response_model=AuthenticatedUserResponse)

@@ -42,3 +42,24 @@ COPY services/manage_incidentsAPI/ services/manage_incidentsAPI/
 COPY packages/shared/ packages/shared/
 
 CMD ["uvicorn", "services.manage_incidentsAPI.main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+FROM base AS suppliers
+
+COPY services/suppliers_api/requirements.txt /tmp/requirements.txt
+RUN uv pip install --system --no-cache -r /tmp/requirements.txt
+COPY services/__init__.py services/__init__.py
+COPY services/suppliers_api/ services/suppliers_api/
+COPY services/JWTauth_api/ services/JWTauth_api/
+RUN mkdir -p services/JWTauth_api/data /data
+
+CMD ["uvicorn", "services.suppliers_api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+FROM base AS analysis
+
+COPY services/api/requirements.txt /tmp/requirements.txt
+RUN uv pip install --system --no-cache -r /tmp/requirements.txt
+COPY services/__init__.py services/__init__.py
+COPY services/api/ services/api/
+COPY services/incidents/ services/incidents/
+
+CMD ["uvicorn", "services.api.app.main:app", "--host", "0.0.0.0", "--port", "8000"]

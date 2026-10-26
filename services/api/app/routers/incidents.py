@@ -6,7 +6,7 @@ import io
 from fastapi import APIRouter, File, HTTPException, UploadFile
 from fastapi.responses import Response
 
-from services.api.app.schemas import IncidentAnalysisResponse
+from services.api.app.schemas import ErrorResponse, IncidentAnalysisResponse
 from services.incidents.analysis import (
     AnalysisResult,
     EmptyCsvFileError,
@@ -25,7 +25,11 @@ router = APIRouter(prefix="/api/incidents", tags=["incidents"])
 LATEST_ANALYSIS_RESULT: AnalysisResult | None = None
 
 
-@router.post("/analyze", response_model=IncidentAnalysisResponse)
+@router.post(
+    "/analyze",
+    response_model=IncidentAnalysisResponse,
+    responses={400: {"model": ErrorResponse}},
+)
 async def analyze_incidents(file: UploadFile = File(...)) -> IncidentAnalysisResponse:
     if not file.filename:
         raise HTTPException(status_code=400, detail="A CSV file is required.")
@@ -49,7 +53,18 @@ async def analyze_incidents(file: UploadFile = File(...)) -> IncidentAnalysisRes
     return IncidentAnalysisResponse.model_validate(serialize_analysis_result(result))
 
 
-@router.get("/results/export")
+@router.get(
+    "/results/export",
+    response_class=Response,
+    response_model=None,
+    responses={
+        200: {
+            "description": "CSV export of the last aggregate analysis result.",
+            "content": {"text/csv": {"schema": {"type": "string"}}},
+        },
+        404: {"model": ErrorResponse},
+    },
+)
 def export_last_analysis() -> Response:
     if LATEST_ANALYSIS_RESULT is None:
         raise HTTPException(

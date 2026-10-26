@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from services.api.app.config import get_settings
 from services.api.app.routers.incidents import router as incidents_router
+from services.api.app.schemas import HealthResponse
 
 settings = get_settings()
 
@@ -23,9 +24,9 @@ app.add_middleware(
 )
 
 
-@app.get("/health")
-def healthcheck() -> dict[str, str]:
-    return {"status": "ok"}
+@app.get("/health", response_model=HealthResponse)
+def healthcheck() -> HealthResponse:
+    return HealthResponse(status="ok")
 
 
 app.include_router(incidents_router)

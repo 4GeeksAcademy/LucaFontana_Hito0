@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -12,8 +12,13 @@ class IngredientCreate(BaseModel):
     country: str
 
 
-class IngredientResponse(IngredientCreate):
+class IngredientResponse(BaseModel):
     id: int
+    name: str
+    sku: str
+    unit: str
+    category: str
+    country: str
     current_stock: float
 
 
@@ -37,26 +42,40 @@ class IngredientExitCreate(BaseModel):
         return self
 
 
-class IngredientEntryResponse(IngredientEntryCreate):
+class IngredientEntryResponse(BaseModel):
     id: int
+    ingredient_id: int
+    quantity: float
+    supplier_name: str
+    location_id: int
     created_at: datetime
     user_uuid: str
 
     model_config = ConfigDict(from_attributes=True)
 
 
-class IngredientExitResponse(IngredientExitCreate):
+class IngredientExitResponse(BaseModel):
     id: int
+    ingredient_id: int
+    quantity: float
+    reason: str
+    location_id: int
     created_at: datetime
     user_uuid: str
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class OrderIngredientResponse(BaseModel):
+    name: str
+    sku: str
+    unit: str
 
 
 class OrderResponse(BaseModel):
     id: int
-    movement_type: str
+    movement_type: Literal["inbound", "outbound"]
     quantity: float
     created_at: datetime
     user_uuid: str
-    product: IngredientResponse
+    ingredient: OrderIngredientResponse

@@ -54,6 +54,14 @@ class UserWithProfileResponse(UserResponse):
 	profile: ProfileResponse | None = None
 
 
+class UserCreateResponse(BaseModel):
+	id: int
+
+
+class UserDeleteResponse(BaseModel):
+	detail: str
+
+
 class UserCreateRequest(BaseModel):
 	email: str
 	password: str
@@ -108,10 +116,10 @@ def _public_user(user: dict) -> UserResponse:
 	)
 
 
-@router.post("", response_model=UserWithProfileResponse, status_code=status.HTTP_201_CREATED)
-def create_user(payload: UserCreateRequest) -> UserWithProfileResponse:
+@router.post("", response_model=UserCreateResponse, status_code=status.HTTP_201_CREATED)
+def create_user(payload: UserCreateRequest) -> UserCreateResponse:
 	try:
-		user, profile = create_user_with_profile(
+		user, _ = create_user_with_profile(
 			email=str(payload.email),
 			password=payload.password,
 			role=UserRole.USER,
@@ -122,7 +130,7 @@ def create_user(payload: UserCreateRequest) -> UserWithProfileResponse:
 	except ValueError as exc:
 		raise HTTPException(status_code=400, detail=str(exc))
 
-	return UserWithProfileResponse(**_public_user(user).model_dump(), profile=ProfileResponse(**profile))
+	return UserCreateResponse(id=user["id"])
 
 
 @router.get("", response_model=list[UserResponse])
@@ -180,8 +188,8 @@ def update_user_endpoint(
 	return _public_user(updated_user)
 
 
-@router.delete("/{id}", status_code=status.HTTP_200_OK)
-def delete_user(id: int, current_user: dict = Depends(get_current_user)) -> dict[str, str]:
+@router.delete("/{id}", response_model=UserDeleteResponse, status_code=status.HTTP_200_OK)
+def delete_user(id: int, current_user: dict = Depends(get_current_user)) -> UserDeleteResponse:
 	is_admin = current_user.get("role") == UserRole.ADMIN
 	is_self = current_user.get("id") == id
 	if not (is_admin or is_self):
@@ -191,4 +199,4 @@ def delete_user(id: int, current_user: dict = Depends(get_current_user)) -> dict
 	if not removed:
 		raise HTTPException(status_code=404, detail="User not found")
 
-	return {"detail": "User deleted"}
+	return UserDeleteResponse(detail="User deleted")
