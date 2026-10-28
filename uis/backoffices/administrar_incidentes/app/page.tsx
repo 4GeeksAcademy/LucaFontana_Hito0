@@ -2,7 +2,21 @@
 
 import { FormEvent, useCallback, useEffect, useState } from "react";
 
-const API = "";
+function getApiBaseUrl(): string {
+    const configuredUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+    const backendUrl = new URL(
+        configuredUrl ?? (typeof window === "undefined" ? "http://127.0.0.1:8000" : window.location.origin),
+    );
+
+    if (backendUrl.hostname.endsWith(".app.github.dev")) {
+        backendUrl.hostname = backendUrl.hostname.replace(/-\d+(?=\.app\.github\.dev$)/, "-8000");
+    } else if (backendUrl.port !== "8000") {
+        backendUrl.port = "8000";
+    }
+
+    backendUrl.pathname = "/";
+    return backendUrl.origin;
+}
 const branches = {
     central: "Central (Medellín / Miami)", medellin_centro: "Medellín Centro", medellin_laureles: "Medellín Laureles", medellin_envigado: "Medellín Envigado", medellin_bello: "Medellín Bello", medellin_itagui: "Medellín Itagüí", bogota_chapinero: "Bogotá Chapinero", bogota_usaquen: "Bogotá Usaquén", cali_granada: "Cali Granada", barranquilla_norte: "Barranquilla Norte", miami_doral: "Miami Doral", miami_hialeah: "Miami Hialeah", miami_kendall: "Miami Kendall", orlando_international: "Orlando International Drive", fort_lauderdale: "Fort Lauderdale",
 } as const;
@@ -20,7 +34,7 @@ const initialFilters: Filters = { status: "", origin: "", branch: "", category: 
 async function request<T = Record<string, unknown> | null>(path: string, options?: RequestInit): Promise<T> {
     let response: Response;
     try {
-        response = await fetch(`${API}${path}`, { ...options, headers: { "Content-Type": "application/json", ...options?.headers } });
+        response = await fetch(`${getApiBaseUrl()}${path}`, { ...options, headers: { "Content-Type": "application/json", ...options?.headers } });
     } catch {
         throw new Error("No se pudo conectar con el servicio de incidentes. Revisa la conexión e inténtalo de nuevo.");
     }
