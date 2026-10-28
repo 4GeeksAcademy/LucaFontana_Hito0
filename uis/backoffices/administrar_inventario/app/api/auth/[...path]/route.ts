@@ -1,4 +1,4 @@
-const backendBaseUrl = process.env.AUTH_API_BASE_URL ?? "https://fuzzy-space-computing-machine-5g4qpxv57495cv6vx-8001.app.github.dev";
+const backendBaseUrl = process.env.AUTH_API_BASE_URL ?? "http://127.0.0.1:8000";
 
 async function proxyAuthRequest(request: Request, path: string[]) {
   const endpoint = path.join("/");

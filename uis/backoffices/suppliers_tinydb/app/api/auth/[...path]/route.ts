@@ -1,4 +1,17 @@
-const backendBaseUrl = process.env.AUTH_API_BASE_URL ?? "http://127.0.0.1:8001";
+function getBackendBaseUrl() {
+  const backendUrl = new URL(process.env.AUTH_API_BASE_URL ?? "http://127.0.0.1:8000");
+  backendUrl.pathname = "/";
+
+  if (backendUrl.hostname.endsWith(".app.github.dev")) {
+    backendUrl.hostname = backendUrl.hostname.replace(/-\d+(?=\.app\.github\.dev$)/, "-8000");
+  } else if (backendUrl.port !== "8000") {
+    backendUrl.port = "8000";
+  }
+
+  return backendUrl.origin;
+}
+
+const backendBaseUrl = getBackendBaseUrl();
 const authEndpoints = new Set([
   "login",
   "me",

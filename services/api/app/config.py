@@ -15,6 +15,6 @@ def get_settings() -> Settings:
     allowed_origins = [origin.strip() for origin in raw_origins.split(",") if origin.strip()]
 
     return Settings(
-        app_name="Brasaland Incidents API",
+        app_name="Brasaland API",
         allowed_origins=allowed_origins,
     )

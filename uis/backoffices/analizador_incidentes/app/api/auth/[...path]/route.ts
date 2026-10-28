@@ -1,4 +1,4 @@
-const backendBaseUrl = process.env.AUTH_API_BASE_URL ?? "http://127.0.0.1:8001";
+const backendBaseUrl = process.env.AUTH_API_BASE_URL ?? "http://127.0.0.1:8000";
 const authEndpoints = new Set(["login", "me", "forgot-password", "reset-password", "change-password"]);
 const rootEndpoints = new Set(["users", "profiles/me"]);
 

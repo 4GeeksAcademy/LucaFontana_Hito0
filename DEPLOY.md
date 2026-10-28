@@ -1,46 +1,16 @@
-# Deploy de `backoffices/my-app`
+# Backend unificado
 
-## APIs locales con Docker Compose
-
-Desde la raiz del repositorio, con Docker y Docker Compose disponibles:
+Desde la raíz del repositorio, inicia el backend con:
 
 ```bash
-export JWT_SECRET="$(python3 -c 'import secrets; print(secrets.token_hex(32))')"
-docker compose up --build -d
-docker compose ps
+myenv/bin/uvicorn services.api.app.main:app --host 0.0.0.0 --port 8000
 ```
 
-Conserva el mismo `JWT_SECRET` entre reinicios para no invalidar tokens existentes.
-Tambien puedes definirlo en un archivo `.env` local en la raiz (no versionado).
+Este único proceso levanta al mismo tiempo todos los routers del backend: autenticación (`/auth`, `/users`, `/profiles`), inventario (`/inventory`), proveedores (`/suppliers`), gestión de incidencias (`/api/incidents`) y análisis CSV (`/api/incidents/analyze` y `/api/incidents/results/export`). No es necesario iniciar una API por dominio ni usar los puertos `8001` y `8002`.
 
-- Inventario: http://localhost:8000/docs
-- Autenticacion JWT: http://localhost:8001/docs
-- Incidencias: http://localhost:8002/docs
+La documentación interactiva de todos los endpoints queda en [http://localhost:8000/docs](http://localhost:8000/docs). Configura las variables necesarias, como `DATABASE_URL` y `JWT_SECRET`, en el entorno antes de iniciar el proceso.
 
-Un unico `services/Dockerfile` contiene tres destinos de construccion:
-`inventory`, `auth` e `incidents`. Compose construye una imagen por destino y
-ejecuta cada API en su propio contenedor. Todas escuchan internamente en el
-puerto 8000; los puertos publicados del host son distintos. PostgreSQL se inicia
-en un cuarto contenedor, sin publicar su puerto al host.
-
-Los volumenes conservan los datos al ejecutar `docker compose down`. Las bases
-empiezan vacias; no se copian datos locales ni archivos `.env` a las imagenes.
-Para consultar registros o detener los servicios:
-
-```bash
-docker compose logs -f inventory auth incidents
-docker compose down
-```
-
-Esta configuracion es para desarrollo local: cambia las credenciales de
-PostgreSQL y revisa la exposicion de puertos antes de desplegarla en produccion.
-Inventario importa actualmente el modulo JWT y consulta su TinyDB, por eso ambos
-montan `auth-data` y reciben el mismo secreto. TinyDB no garantiza escrituras
-concurrentes entre procesos: realiza altas y cambios de usuarios desde `auth`,
-no desde las rutas `/auth` duplicadas en inventario. Para produccion, centraliza
-la autenticacion o migra los usuarios a una base que soporte concurrencia.
-
-El frontend no forma parte de este Compose; puede iniciarse como se indica abajo.
+El comando inicia el backend; no inicia los proyectos Next.js del frontend, que se ejecutan por separado.
 
 Este proyecto depende de dos procesos separados:
 
@@ -49,14 +19,13 @@ Este proyecto depende de dos procesos separados:
 
 ## 1. Iniciar el backend desde la raíz del proyecto
 
-Antes de levantar o desplegar el frontend, inicia el servidor API desde la raíz del repositorio:
+Para iniciar el backend, ejecuta desde la raíz del repositorio:
 
 ```bash
-cd /workspaces/LucaFontana_Hito0
-python -m uvicorn services.api.app.main:app --host 0.0.0.0 --port 8000
+myenv/bin/uvicorn services.api.app.main:app --host 0.0.0.0 --port 8000
 ```
 
-Esto es necesario porque el proyecto Next consume el backend de incidencias a través de sus route handlers internos.
+Este es el único comando necesario para el backend: deja disponibles todos los dominios y endpoints en el puerto `8000`.
 
 ## 2. Build y arranque del proyecto Next.js
 

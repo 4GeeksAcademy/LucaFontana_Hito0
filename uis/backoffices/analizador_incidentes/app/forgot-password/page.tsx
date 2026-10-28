@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 
-import { createAuthApiClient, resolveAuthApiBaseUrl } from "@shared/auth";
+import { createAuthApiClient } from "@shared/auth";
+import { getAuthApiBaseUrl } from "@/lib/authApi";
 
-const api = createAuthApiClient(resolveAuthApiBaseUrl(), () => undefined);
+const api = createAuthApiClient(getAuthApiBaseUrl(), () => undefined);
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");

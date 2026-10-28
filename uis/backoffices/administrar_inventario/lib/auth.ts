@@ -1,6 +1,20 @@
 const TOKEN_STORAGE_KEY = "auth_token";
-const AUTH_API_PATH = "/api/auth";
+const AUTH_API_PATH = "/auth";
 export const AUTH_UNAUTHORIZED_EVENT = "inventory:unauthorized";
+
+function getAuthApiBaseUrl(): string {
+  const configuredUrl = process.env.NEXT_PUBLIC_AUTH_API_URL;
+  const backendUrl = new URL(
+    configuredUrl ?? (typeof window === "undefined" ? "http://127.0.0.1:8000" : window.location.origin),
+  );
+  if (backendUrl.hostname.endsWith(".app.github.dev")) {
+    backendUrl.hostname = backendUrl.hostname.replace(/-\d+(?=\.app\.github\.dev$)/, "-8000");
+  } else if (backendUrl.port !== "8000") {
+    backendUrl.port = "8000";
+  }
+  backendUrl.pathname = "/";
+  return backendUrl.origin;
+}
 
 export type AuthUser = {
   id: number;
@@ -72,7 +86,7 @@ async function request(path: string, init: RequestInit = {}, requiresAuth = true
 
   let response: Response;
   try {
-    response = await fetch(`${AUTH_API_PATH}${path}`, { ...init, headers, cache: "no-store" });
+    response = await fetch(`${getAuthApiBaseUrl()}${AUTH_API_PATH}${path}`, { ...init, headers, cache: "no-store" });
   } catch {
     throw new Error("No se pudo conectar con el servicio de autenticación.");
   }

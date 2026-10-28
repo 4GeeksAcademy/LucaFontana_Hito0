@@ -7,14 +7,14 @@ import {
   clearStoredToken,
   createAuthApiClient,
   getStoredToken,
-  resolveAuthApiBaseUrl,
   setStoredToken,
   type AuthUser,
   type ProfileUpdatePayload,
   type RegisterPayload,
 } from "@shared/auth";
+import { getAuthApiBaseUrl } from "@/lib/authApi";
 
-const AUTH_API_BASE_URL = resolveAuthApiBaseUrl();
+const AUTH_API_BASE_URL = getAuthApiBaseUrl();
 
 type AuthContextValue = {
   user: AuthUser | null;

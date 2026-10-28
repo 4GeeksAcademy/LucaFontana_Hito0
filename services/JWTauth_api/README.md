@@ -13,10 +13,12 @@ API de autenticación (FastAPI + TinyDB) usada por los backoffices en `/uis/back
 
 Copia `.env.example` a `.env` y completa los valores. Nunca guardes una API key en el código.
 
-## Ejecutar localmente
-Corre en el puerto **8001** para no chocar con `suppliers_api` / `services/api`, que usan el 8000:
+## Ejecución
+
+JWTauth se integra como routers en el backend unificado. Para iniciar autenticación junto con inventario, proveedores e incidencias, ejecuta desde la raíz del repositorio:
 
 ```bash
-uv sync
-uv run uvicorn main:app --reload --port 8001
+myenv/bin/uvicorn services.api.app.main:app --host 0.0.0.0 --port 8000
 ```
+
+Las rutas de autenticación (`/auth`, `/users` y `/profiles`) quedan disponibles en el puerto `8000`, junto con el resto de endpoints. No hace falta iniciar esta API por separado en `8001`.
