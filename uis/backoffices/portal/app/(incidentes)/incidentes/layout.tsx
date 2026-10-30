@@ -1,0 +1,21 @@
+import type { Metadata } from "next";
+import { SharedAuthGuard } from "@shared/auth/AuthGuard";
+import "./globals.css";
+
+export const metadata: Metadata = {
+  title: "Centro de incidentes | Brasaland Digital",
+  description: "Gestión centralizada de incidentes operativos.",
+};
+
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  return (
+    <html
+      lang="es"
+      className="h-full antialiased"
+    >
+      <body className="min-h-full flex flex-col">
+        <SharedAuthGuard>{children}</SharedAuthGuard>
+      </body>
+    </html>
+  );
+}

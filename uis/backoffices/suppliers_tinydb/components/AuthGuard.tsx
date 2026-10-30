@@ -1,27 +1,15 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 import { useAuth } from "@/contexts/AuthContext";
 
-const PUBLIC_PATHS = ["/login", "/register", "/forgot-password", "/reset-password"];
-
 export function AuthGuard({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
-  const router = useRouter();
   const { isAuthenticated, loading } = useAuth();
-  const isPublicPath = PUBLIC_PATHS.some((path) => pathname.startsWith(path));
 
   useEffect(() => {
-    if (!loading && !isAuthenticated && !isPublicPath) {
-      router.replace("/login");
-    }
-  }, [loading, isAuthenticated, isPublicPath, router]);
-
-  if (isPublicPath) {
-    return <>{children}</>;
-  }
+    if (!loading && !isAuthenticated) window.location.assign(new URL("/login", window.location.origin).toString());
+  }, [loading, isAuthenticated]);
 
   if (loading || !isAuthenticated) {
     return (

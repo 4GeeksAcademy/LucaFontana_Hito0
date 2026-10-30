@@ -1,7 +1,6 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 
 import {
   clearStoredToken,
@@ -30,14 +29,13 @@ type AuthContextValue = {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
 
   const handleUnauthorized = useCallback(() => {
     setUser(null);
-    router.push("/login");
-  }, [router]);
+    window.location.assign(new URL("/login", window.location.origin).toString());
+  }, []);
 
   const apiClient = useMemo(
     () => createAuthApiClient(AUTH_API_BASE_URL, handleUnauthorized),
@@ -80,8 +78,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = useCallback(() => {
     clearStoredToken();
     setUser(null);
-    router.push("/login");
-  }, [router]);
+    window.location.assign(new URL("/login", window.location.origin).toString());
+  }, []);
 
   const updateProfile = useCallback(
     async (payload: ProfileUpdatePayload) => {

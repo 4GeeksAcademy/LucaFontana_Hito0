@@ -1,6 +1,7 @@
 {
   "name": "auth-test-suite",
   "private": true,
+  "packageManager": "pnpm@12.16.1",
   "scripts": {
     "test": "jest --config jest.config.cjs",
     "test:coverage": "jest --config jest.config.cjs --coverage"

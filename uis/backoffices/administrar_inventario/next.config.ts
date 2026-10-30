@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  basePath: "/inventario",
   /* config options here */
   cacheComponents: true,
   partialPrefetching: true,

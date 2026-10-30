@@ -7,12 +7,15 @@ services:
     ports:
       - "3000:3000"
       - "3001:3001"
-      - "3002:3002"
-      - "3003:3003"
-      - "3004:3004"
 
     env_file:
       - .env
+
+    environment:
+      AUTH_API_BASE_URL: http://inventory:8000
+      INVENTORY_API_BASE_URL: http://inventory:8000
+      SUPPLIERS_API_BASE_URL: http://inventory:8000
+      INCIDENTS_API_BASE_URL: http://incidents:8000
 
     volumes:
       - ./uis:/app
@@ -21,6 +24,8 @@ services:
       - incidents_node_modules:/app/backoffices/administrar_incidentes/node_modules
       - analyzer_node_modules:/app/backoffices/analizador_incidentes/node_modules
       - suppliers_node_modules:/app/backoffices/suppliers_tinydb/node_modules
+      - portal_node_modules:/app/backoffices/portal/node_modules
+      - talent_node_modules:/app/talent-pipeline-tracker/node_modules
 
     command: ["sh", "/app/start.sh"]
 
@@ -28,6 +33,7 @@ services:
       - inventory
       - inventory-db
       - auth
+      - incidents
 
     networks:
       - company_network
@@ -45,6 +51,8 @@ services:
       JWT_SECRET: ${JWT_SECRET:?Define JWT_SECRET antes de iniciar Compose}
     volumes:
       - auth-data:/app/services/JWTauth_api/data
+    networks:
+      - company_network
     depends_on:
       inventory-db:
         condition: service_healthy
@@ -60,6 +68,8 @@ services:
       JWT_SECRET: ${JWT_SECRET:?Define JWT_SECRET antes de iniciar Compose}
     volumes:
       - auth-data:/app/services/JWTauth_api/data
+    networks:
+      - company_network
 
   incidents:
     build:
@@ -72,6 +82,8 @@ services:
       INCIDENTS_DB_PATH: /data/incidents.json
     volumes:
       - incidents-data:/data
+    networks:
+      - company_network
 
   inventory-db:
     image: postgres:16-alpine
@@ -86,6 +98,8 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+    networks:
+      - company_network
 
 volumes:
   inventory-data:
@@ -95,6 +109,8 @@ volumes:
   incidents_node_modules:
   analyzer_node_modules:
   suppliers_node_modules:
+  portal_node_modules:
+  talent_node_modules:
   incidents-data:
 
 networks:

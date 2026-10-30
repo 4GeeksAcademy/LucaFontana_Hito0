@@ -3,7 +3,11 @@
 Desde la raíz del repositorio, inicia el backend con:
 
 ```bash
-myenv/bin/uvicorn services.api.app.main:app --host 0.0.0.0 --port 8000
+PORT=3101 corepack pnpm --filter administrar_inventario dev
+PORT=3102 corepack pnpm --filter administrar_incidentes dev
+PORT=3103 corepack pnpm --filter my-app dev
+PORT=3104 corepack pnpm --filter suppliers-tinydb dev
+PORT=3105 corepack pnpm --filter talent-pipeline-tracker dev
 ```
 
 Este único proceso levanta al mismo tiempo todos los routers del backend: autenticación (`/auth`, `/users`, `/profiles`), inventario (`/inventory`), proveedores (`/suppliers`), gestión de incidencias (`/api/incidents`) y análisis CSV (`/api/incidents/analyze` y `/api/incidents/results/export`). No es necesario iniciar una API por dominio ni usar los puertos `8001` y `8002`.

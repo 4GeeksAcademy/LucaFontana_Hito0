@@ -1,0 +1,9 @@
+packages:
+  - "uis/backoffices/*"
+  - "uis/talent-pipeline-tracker"
+  - "uis/website"
+  - "packages/*"
+allowBuilds:
+  '@parcel/watcher': true
+  sharp: true
+  unrs-resolver: true
