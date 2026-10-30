@@ -11,33 +11,32 @@ uv run pytest
 uv run pytest --cov
 ```
 
-Las utilidades de autenticacion del frontend viven en `packages/shared/auth` y son consumidas por las dos aplicaciones Next.js. Ejecuta Jest desde la raiz del repositorio, no desde una de las carpetas de UI:
+Las utilidades de autenticacion del frontend y el guard compartido viven en `packages/shared/auth` y son consumidos por el portal unificado. Ejecuta Jest desde la raiz del repositorio:
 
 ```bash
 cd /workspaces/LucaFontana_Hito0
-npm install
-npm test
+corepack pnpm install --frozen-lockfile
+corepack pnpm test
 ```
 
 Para ejecutar las pruebas frontend con cobertura:
 
 ```bash
-npm run test:coverage
+corepack pnpm run test:coverage
 ```
 
 El comando equivalente usando Jest directamente es:
 
 ```bash
-npx jest --config jest.config.cjs --coverage
+corepack pnpm exec jest --config jest.config.cjs --coverage
 ```
 
-La configuracion real de Jest es `jest.config.cjs`. Las pruebas cubren `packages/shared/auth` y los componentes `AuthGuard` de ambas aplicaciones.
+La configuracion real de Jest es `jest.config.cjs`. Las pruebas cubren `packages/shared/auth`, incluido `SharedAuthGuard`; ya no importan componentes de las aplicaciones retiradas.
 
 Los proyectos de UI conservan sus comprobaciones normales de lint:
 
 ```bash
-cd uis/backoffices/analizador_incidentes && npm run lint
-cd ../suppliers_tinydb && npm run lint
+corepack pnpm --filter backoffice-portal lint
 ```
 
 Las pruebas nunca abren `services/JWTauth_api/data/db.json`; cada prueba del backend sustituye las tablas TinyDB importadas por tablas temporales en memoria.
@@ -52,8 +51,7 @@ Las pruebas nunca abren `services/JWTauth_api/data/db.json`; cada prueba del bac
 | `users.create_user` | Un registro valido devuelve usuario y perfil | Campos de perfil opcionales omitidos; email con caracteres especiales | Email invalido, contraseña vacia, email duplicado |
 | Almacenamiento compartido de tokens | El token del navegador se puede guardar, leer y eliminar | Las llamadas del servidor funcionan sin `window` | No queda un token antiguo despues de eliminarlo |
 | Cliente compartido de la API de autenticacion | El login y las peticiones protegidas adjuntan el token correcto | Barra final en la URL base; errores de API sin JSON | Un 401 elimina la sesion y activa la redireccion; los errores de red se traducen |
-| `AuthGuard` de `analizador_incidentes` | Una ruta privada muestra el contenido para usuarios autenticados | Las rutas publicas se muestran durante la carga o sin sesion | Un usuario sin sesion es redirigido a `/login` |
-| `AuthGuard` de `suppliers_tinydb` | Una ruta privada muestra el contenido para usuarios autenticados | Las rutas publicas se muestran durante la carga o sin sesion | Un usuario sin sesion es redirigido a `/login` |
+| `SharedAuthGuard` del portal | Una sesion validada muestra el contenido privado | El contenido permanece oculto mientras se verifica la sesion | Un fallo de verificacion muestra un error y permite reintentar |
 
 ### Justificacion de los limites
 
@@ -61,4 +59,4 @@ El email se prueba con espacios y diferencias de mayusculas porque el servicio t
 
 ## Flujo asistido por IA
 
-Durante el diseño de la suite, una inspeccion asistida por IA comprobo que el repositorio no contiene el directorio solicitado `packages/auth`: la implementacion compartida activa esta en `packages/shared/auth` y es importada por las dos aplicaciones Next.js. El plan se ajusto para probar ese limite real y los dos guards duplicados. La misma inspeccion detecto que el registro validaba el email pero aceptaba una contraseña vacia; se añadio una prueba de regresion y se reforzo el modelo de entrada en lugar de ocultar el comportamiento en un fixture.
+La implementacion compartida activa esta en `packages/shared/auth`, no en `packages/auth`. Tras unificar los backoffices, la suite de guards se adapto al guard compartido del portal. Las pruebas del cliente de autenticacion siguen verificando tokens, errores y respuestas no autorizadas.

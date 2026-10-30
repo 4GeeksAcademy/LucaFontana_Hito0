@@ -1,77 +1,59 @@
-import { render, screen, waitFor } from "@testing-library/react";
-import { usePathname, useRouter } from "next/navigation";
+import { fireEvent, render, screen } from "@testing-library/react";
+import { createAuthApiClient, getStoredToken, resolveAuthApiBaseUrl } from "@shared/auth";
+import { SharedAuthGuard } from "../packages/shared/auth/AuthGuard";
 
-import { useAuth } from "@/contexts/AuthContext";
-import { AuthGuard as AnalizadorAuthGuard } from "../uis/backoffices/analizador_incidentes/components/AuthGuard";
-import { AuthGuard as SuppliersAuthGuard } from "../uis/backoffices/suppliers_tinydb/components/AuthGuard";
-
-jest.mock("next/navigation", () => ({
-  usePathname: jest.fn(),
-  useRouter: jest.fn(),
+jest.mock("@shared/auth", () => ({
+  createAuthApiClient: jest.fn(),
+  getStoredToken: jest.fn(),
+  resolveAuthApiBaseUrl: jest.fn(),
 }));
 
-jest.mock("@/contexts/AuthContext", () => ({
-  useAuth: jest.fn(),
-}));
+const getMe = jest.fn();
+const apiClientMock = jest.mocked(createAuthApiClient);
 
-const pathnameMock = usePathname as jest.MockedFunction<typeof usePathname>;
-const routerMock = useRouter as jest.MockedFunction<typeof useRouter>;
-const authMock = useAuth as jest.MockedFunction<typeof useAuth>;
-
-function configureAuth(pathname: string, isAuthenticated: boolean, loading = false) {
-  pathnameMock.mockReturnValue(pathname);
-  const router = { replace: jest.fn(), push: jest.fn() };
-  routerMock.mockReturnValue(router as never);
-  authMock.mockReturnValue({
-    user: isAuthenticated ? ({ id: 1 } as never) : null,
-    isAuthenticated,
-    loading,
-  } as never);
-}
-
-describe.each([
-  ["analizador", AnalizadorAuthGuard],
-  ["suppliers", SuppliersAuthGuard],
-])("%s auth guard", (_name, AuthGuard) => {
+describe("shared backoffice auth guard", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
+    jest.mocked(getStoredToken).mockReturnValue("test-token");
+    jest.mocked(resolveAuthApiBaseUrl).mockReturnValue("http://localhost:3000/api/auth");
+    apiClientMock.mockReturnValue({
+      getMe,
+      login: jest.fn(),
+      register: jest.fn(),
+      updateProfile: jest.fn(),
+      forgotPassword: jest.fn(),
+      resetPassword: jest.fn(),
+      changePassword: jest.fn(),
+    });
   });
 
-  it("redirects an unauthenticated user away from a protected route", async () => {
-    configureAuth("/dashboard", false);
+  it("keeps protected content hidden while checking the session", () => {
+    getMe.mockReturnValue(new Promise(() => {}));
 
-    render(
-      <AuthGuard>
-        <div>Private content</div>
-      </AuthGuard>,
-    );
+    render(<SharedAuthGuard><div>Private content</div></SharedAuthGuard>);
 
-    await waitFor(() => expect(routerMock().replace).toHaveBeenCalledWith("/login"));
+    expect(screen.getByRole("status")).toHaveTextContent("Verificando sesión");
     expect(screen.queryByText("Private content")).not.toBeInTheDocument();
   });
 
-  it("allows public login routes while the session is unavailable", () => {
-    configureAuth("/login", false, true);
+  it("renders a protected route after validating the session", async () => {
+    getMe.mockResolvedValue({ id: 1 });
 
-    render(
-      <AuthGuard>
-        <div>Login content</div>
-      </AuthGuard>,
-    );
+    render(<SharedAuthGuard><div>Private content</div></SharedAuthGuard>);
 
-    expect(screen.getByText("Login content")).toBeInTheDocument();
-    expect(routerMock().replace).not.toHaveBeenCalled();
+    expect(await screen.findByText("Private content")).toBeInTheDocument();
+    expect(getMe).toHaveBeenCalledTimes(1);
   });
 
-  it("renders a protected route for an authenticated user", () => {
-    configureAuth("/dashboard", true);
+  it("shows a verification error and allows retrying", async () => {
+    getMe.mockRejectedValueOnce(new Error("Service unavailable")).mockResolvedValueOnce({ id: 1 });
 
-    render(
-      <AuthGuard>
-        <div>Private content</div>
-      </AuthGuard>,
-    );
+    render(<SharedAuthGuard><div>Private content</div></SharedAuthGuard>);
 
-    expect(screen.getByText("Private content")).toBeInTheDocument();
+    expect(await screen.findByRole("alert")).toHaveTextContent("No se pudo verificar la sesión.");
+    expect(screen.queryByText("Private content")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Reintentar" }));
+    expect(await screen.findByText("Private content")).toBeInTheDocument();
+    expect(getMe).toHaveBeenCalledTimes(2);
   });
 });

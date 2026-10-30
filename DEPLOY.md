@@ -1,79 +1,67 @@
-# Backend unificado
+# Backend y backoffice unificados
 
-Desde la raíz del repositorio, inicia el backend con:
+Ejecuta los comandos desde la raiz del repositorio.
 
-```bash
-PORT=3101 corepack pnpm --filter administrar_inventario dev
-PORT=3102 corepack pnpm --filter administrar_incidentes dev
-PORT=3103 corepack pnpm --filter my-app dev
-PORT=3104 corepack pnpm --filter suppliers-tinydb dev
-PORT=3105 corepack pnpm --filter talent-pipeline-tracker dev
-```
+## 1. Backend
 
-Este único proceso levanta al mismo tiempo todos los routers del backend: autenticación (`/auth`, `/users`, `/profiles`), inventario (`/inventory`), proveedores (`/suppliers`), gestión de incidencias (`/api/incidents`) y análisis CSV (`/api/incidents/analyze` y `/api/incidents/results/export`). No es necesario iniciar una API por dominio ni usar los puertos `8001` y `8002`.
-
-La documentación interactiva de todos los endpoints queda en [http://localhost:8000/docs](http://localhost:8000/docs). Configura las variables necesarias, como `DATABASE_URL` y `JWT_SECRET`, en el entorno antes de iniciar el proceso.
-
-El comando inicia el backend; no inicia los proyectos Next.js del frontend, que se ejecutan por separado.
-
-Este proyecto depende de dos procesos separados:
-
-- el backend FastAPI, que debe iniciarse desde la raíz del repositorio;
-- el frontend Next.js, que vive en `uis/backoffices/my-app`.
-
-## 1. Iniciar el backend desde la raíz del proyecto
-
-Para iniciar el backend, ejecuta desde la raíz del repositorio:
+Configura `DATABASE_URL`, `JWT_SECRET` y las demas variables del backend antes de iniciar:
 
 ```bash
 myenv/bin/uvicorn services.api.app.main:app --host 0.0.0.0 --port 8000
 ```
 
-Este es el único comando necesario para el backend: deja disponibles todos los dominios y endpoints en el puerto `8000`.
+Este proceso sirve autenticacion, inventario, proveedores e incidencias. La documentacion esta en `http://localhost:8000/docs`.
 
-## 2. Build y arranque del proyecto Next.js
-
-En otra terminal, entra al proyecto de backoffice:
+## 2. Instalar dependencias del frontend
 
 ```bash
-cd /workspaces/LucaFontana_Hito0/uis/backoffices/my-app
+corepack pnpm install --frozen-lockfile
 ```
 
-Instala dependencias si todavía no lo hiciste:
+No ejecutes instalaciones independientes en las carpetas antiguas.
+
+## 3. Iniciar el portal
+
+En otra terminal, para desarrollo:
 
 ```bash
-npm install
+corepack pnpm --filter backoffice-portal dev
 ```
 
-Genera el build de producción:
+Para produccion:
 
 ```bash
-npm run build
+corepack pnpm --filter backoffice-portal build
+corepack pnpm --filter backoffice-portal start
 ```
 
-Y luego arranca el proyecto con:
+Todas las interfaces se sirven desde `http://localhost:3000`: `/incidentes`, `/inventario`, `/analizador-incidentes`, `/proveedores` y `/talent-pipeline-tracker`. No se necesitan servidores en los puertos 3101 a 3105. El website es independiente.
+
+## Configuracion del portal
+
+Configura las variables locales en `uis/backoffices/portal/.env.local` y reinicia el portal:
+
+- `AUTH_API_BASE_URL`, `INVENTORY_API_BASE_URL`, `SUPPLIERS_API_BASE_URL` e `INCIDENTS_API_BASE_URL`: por defecto, `http://127.0.0.1:8000`.
+- `NEXT_PUBLIC_TALENT_API_URL`: URL de la API de candidaturas accesible desde el navegador, sin agregar `/records`. Debe estar definida antes del build de produccion.
+- `PASSWORD_RESET_URL`: se configura en el backend con la URL publica del portal mas `/reset-password`.
+
+Consulta las rutas y detalles en el [README del portal](uis/backoffices/portal/README.md).
+
+## Docker Compose
 
 ```bash
-npm run start
+docker compose up --build interfaces
 ```
 
-El orden importa: primero debe estar levantado el servidor desde la raíz del proyecto y después debe hacerse el deploy o arranque del proyecto Next con `npm run start` para que funcione correctamente.
+El servicio de interfaces instala el workspace con pnpm y arranca solo el portal (3000) y el website (3001). Compose inicia sus dependencias backend. No uses `down -v` para actualizar: eliminaria tambien volumenes de datos.
 
-## 3. Variable opcional de backend
-
-Si el backend no corre en `http://127.0.0.1:8000`, define esta variable antes de arrancar Next:
+Si reutilizas volumenes de dependencias de una imagen anterior, actualizalos sin borrar datos:
 
 ```bash
-INCIDENTS_API_BASE_URL=http://tu-backend:8000
+docker compose run --rm --no-deps interfaces corepack pnpm install --frozen-lockfile
+docker compose up --build interfaces
 ```
 
-Por ejemplo:
+## Limpieza de la migracion
 
-```bash
-cd /workspaces/LucaFontana_Hito0/uis/backoffices/my-app
-INCIDENTS_API_BASE_URL=http://127.0.0.1:8000 npm run start
-```
-
-## VPS DigitalOcean
-
-La configuracion de produccion, el acceso inicial por tunel SSH y la preparacion de GitHub Actions estan documentados en [DEPLOY_VPS.md](DEPLOY_VPS.md).
+El codigo ejecutable de las cinco aplicaciones originales se retiro. Sus carpetas pueden conservar archivos restringidos, configuraciones locales, recursos estaticos y caches. No participan del workspace ni del arranque; no se eliminaron automaticamente sus `node_modules`, `.next`, archivos de entorno ni lockfiles npm.

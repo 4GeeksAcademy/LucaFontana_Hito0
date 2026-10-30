@@ -19,14 +19,9 @@ uis/*
 !uis/website/**
 !uis/backoffices/
 uis/backoffices/*
-!uis/backoffices/administrar_inventario/
-!uis/backoffices/administrar_inventario/**
-!uis/backoffices/administrar_incidentes/
-!uis/backoffices/administrar_incidentes/**
-!uis/backoffices/analizador_incidentes/
-!uis/backoffices/analizador_incidentes/**
-!uis/backoffices/suppliers_tinydb/
-!uis/backoffices/suppliers_tinydb/**
+!uis/backoffices/portal/
+!uis/backoffices/portal/**
+!uis/start.sh
 uis/**/node_modules
 uis/**/.next
 uis/**/.env*

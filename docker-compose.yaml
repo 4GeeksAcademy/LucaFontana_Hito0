@@ -1,8 +1,8 @@
 services:
   interfaces:
     build:
-      context: ./uis
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: uis/Dockerfile
 
     ports:
       - "3000:3000"
@@ -18,16 +18,13 @@ services:
       INCIDENTS_API_BASE_URL: http://incidents:8000
 
     volumes:
-      - ./uis:/app
-      - website_node_modules:/app/website/node_modules
-      - backoffice_node_modules:/app/backoffices/administrar_inventario/node_modules
-      - incidents_node_modules:/app/backoffices/administrar_incidentes/node_modules
-      - analyzer_node_modules:/app/backoffices/analizador_incidentes/node_modules
-      - suppliers_node_modules:/app/backoffices/suppliers_tinydb/node_modules
-      - portal_node_modules:/app/backoffices/portal/node_modules
-      - talent_node_modules:/app/talent-pipeline-tracker/node_modules
+      - ./uis:/app/uis
+      - ./packages/shared:/app/packages/shared
+      - interfaces_node_modules:/app/node_modules
+      - website_node_modules:/app/uis/website/node_modules
+      - portal_node_modules:/app/uis/backoffices/portal/node_modules
 
-    command: ["sh", "/app/start.sh"]
+    command: ["sh", "/app/uis/start.sh"]
 
     depends_on:
       - inventory
@@ -105,12 +102,8 @@ volumes:
   inventory-data:
   auth-data:
   website_node_modules:
-  backoffice_node_modules:
-  incidents_node_modules:
-  analyzer_node_modules:
-  suppliers_node_modules:
+  interfaces_node_modules:
   portal_node_modules:
-  talent_node_modules:
   incidents-data:
 
 networks:

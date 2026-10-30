@@ -12,9 +12,9 @@ corepack pnpm --filter backoffice-portal dev
 
 El portal sirve directamente `/incidentes`, `/talent-pipeline-tracker` (incluidas las fichas de candidatos), `/analizador-incidentes`, `/inventario` y `/proveedores` desde `http://localhost:3000`. Todas las interfaces de backoffice corren en un solo proceso Next.js; ya no requieren servidores en los puertos `3101` a `3105`. El backend se inicia por separado.
 
-Las aplicaciones originales se conservan durante la migración, pero no es necesario iniciarlas.
+El código ejecutable y los manifests de las aplicaciones originales se retiraron del repositorio y del workspace. Sus carpetas residuales pueden contener recursos, archivos restringidos, configuraciones locales y cachés; ya no son aplicaciones independientes.
 
-El script `uis/start.sh` usa rutas de contenedor (`/app`): inicia únicamente el portal y el website por separado en `http://localhost:3001`.
+El script `uis/start.sh` usa rutas de contenedor (`/app/uis`): inicia únicamente el portal y el website por separado en `http://localhost:3001`. Docker instala ambos desde el lockfile pnpm de la raíz, no desde los lockfiles npm antiguos.
 
 Al usar Docker Compose, solo el puerto `3000` queda publicado para el portal de backoffices. El website conserva el puerto `3001`.
 
@@ -24,7 +24,7 @@ Configura `NEXT_PUBLIC_TALENT_API_URL` en `uis/backoffices/portal/.env.local` co
 
 Por compatibilidad, se acepta `NEXT_PUBLIC_API_URL` si no se define la variable específica. El portal no carga el archivo de entorno de la aplicación original. Reinicia el servidor tras configurar la variable; para producción, debe estar definida antes del build.
 
-La aplicación original de `uis/talent-pipeline-tracker` se conserva sin cambios, pero ya no hace falta iniciarla para acceder al tracker desde el portal.
+La implementación activa del tracker vive dentro del portal; no requiere imports ni servidores de `uis/talent-pipeline-tracker`.
 
 ## Rutas
 
@@ -46,8 +46,8 @@ El portal reutiliza el token `auth_token` almacenado en `localStorage` por los b
 
 Proveedores usa `/api/suppliers`, `/api/suppliers/rate` y `/api/suppliers/status` en el mismo puerto del portal. El servidor reenvía las peticiones a `SUPPLIERS_API_BASE_URL` (por defecto, `http://127.0.0.1:8000`; también se acepta `NEXT_PUBLIC_SUPPLIERS_API_URL` como alternativa). Configura la variable en el entorno del portal si necesitas otro backend y reinícialo. Las rutas antiguas bajo `/proveedores/api/suppliers` siguen disponibles. Se conservan el directorio, filtros, búsqueda por id, altas, bajas, tarifas y estados; el login, registro y recuperación utilizan las pantallas centrales.
 
-Inventario usa el contexto de autenticación del portal y `/api/inventory/` en el mismo puerto. El servidor reenvía las peticiones a `INVENTORY_API_BASE_URL` (por defecto, `http://127.0.0.1:8000`). Configura esa variable en el entorno del portal si necesitas otro backend. Se conservan las rutas antiguas `/inventario/api/inventory/` y la aplicación original, pero ya no hace falta iniciarla.
+Inventario usa el contexto de autenticación del portal y `/api/inventory/` en el mismo puerto. El servidor reenvía las peticiones a `INVENTORY_API_BASE_URL` (por defecto, `http://127.0.0.1:8000`). Configura esa variable en el entorno del portal si necesitas otro backend. Se conservan las rutas antiguas `/inventario/api/inventory/`.
 
-El analizador usa `/api/incidents/analyze` y `/api/incidents/results/export` en el mismo puerto del portal. El servidor reenvía estas peticiones a `INCIDENTS_API_BASE_URL` (por defecto, `http://127.0.0.1:8000`). Si necesitas otra dirección, configura esa variable en el entorno del portal y reinícialo. Las rutas antiguas bajo `/analizador-incidentes/api/incidents/` siguen disponibles. La aplicación original del analizador se conserva sin cambios.
+El analizador usa `/api/incidents/analyze` y `/api/incidents/results/export` en el mismo puerto del portal. El servidor reenvía estas peticiones a `INCIDENTS_API_BASE_URL` (por defecto, `http://127.0.0.1:8000`). Si necesitas otra dirección, configura esa variable en el entorno del portal y reinícialo. Las rutas antiguas bajo `/analizador-incidentes/api/incidents/` siguen disponibles.
 
 Para que los enlaces de recuperación abran el formulario central, configura `PASSWORD_RESET_URL` con la URL pública del portal más `/reset-password` (por ejemplo, `http://localhost:3000/reset-password` en desarrollo).

@@ -1,30 +1,22 @@
-FROM node:22-alpine
+FROM node:24-alpine
 
 WORKDIR /app
 
-# Copiamos primero los archivos de dependencias para aprovechar la cache de Docker.
-COPY website/package*.json ./website/
-COPY backoffices/administrar_inventario/package*.json ./backoffices/administrar_inventario/
-COPY backoffices/administrar_incidentes/package*.json ./backoffices/administrar_incidentes/
-COPY backoffices/analizador_incidentes/package*.json ./backoffices/analizador_incidentes/
-COPY backoffices/suppliers_tinydb/package*.json ./backoffices/suppliers_tinydb/
-COPY backoffices/portal/package*.json ./backoffices/portal/
-COPY talent-pipeline-tracker/package*.json ./talent-pipeline-tracker/
+RUN corepack enable
 
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY packages/shared/package.json ./packages/shared/
+COPY uis/website/package.json ./uis/website/
+COPY uis/backoffices/portal/package.json ./uis/backoffices/portal/
 
-# Instalamos las dependencias de cada aplicación por separado.
-RUN npm install --prefix ./website
-RUN npm install --prefix ./backoffices/administrar_inventario
-RUN npm install --prefix ./backoffices/administrar_incidentes
-RUN npm install --prefix ./backoffices/analizador_incidentes
-RUN npm install --prefix ./backoffices/suppliers_tinydb
-RUN npm install --prefix ./backoffices/portal
-RUN npm install --prefix ./talent-pipeline-tracker
+RUN corepack pnpm install --frozen-lockfile
 
-# Ahora copiamos el resto del código.
-COPY . .
+COPY packages/shared ./packages/shared
+COPY uis/website ./uis/website
+COPY uis/backoffices/portal ./uis/backoffices/portal
+COPY uis/start.sh ./uis/start.sh
 
 EXPOSE 3000
 EXPOSE 3001
 
-CMD ["sh", "/app/start.sh"]
+CMD ["sh", "/app/uis/start.sh"]

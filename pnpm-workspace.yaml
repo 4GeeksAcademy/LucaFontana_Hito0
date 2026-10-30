@@ -1,6 +1,5 @@
 packages:
-  - "uis/backoffices/*"
-  - "uis/talent-pipeline-tracker"
+  - "uis/backoffices/portal"
   - "uis/website"
   - "packages/*"
 allowBuilds:
