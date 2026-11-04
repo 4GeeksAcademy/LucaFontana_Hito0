@@ -1,112 +1,54 @@
 services:
-  interfaces:
+  backend:
+    build:
+      context: .
+      dockerfile: services/Dockerfile
+      target: unified
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    environment:
+      INCIDENTS_DB_PATH: /data/incidents/incidents.json
+      SUPPLIERS_DB_PATH: /data/suppliers/suppliers.json
+    ports:
+      - "8000:8000"
+    volumes:
+      - auth-data:/app/services/JWTauth_api/data
+      - incidents-data:/data/incidents
+      - suppliers-data:/data/suppliers
+
+  website:
     build:
       context: .
       dockerfile: uis/Dockerfile
-
+      target: website
+    restart: unless-stopped
     ports:
       - "3000:3000"
-      - "3001:3001"
 
+  backoffice:
+    build:
+      context: .
+      dockerfile: uis/Dockerfile
+      target: portal
+      args:
+        NEXT_PUBLIC_TALENT_API_URL: ${NEXT_PUBLIC_TALENT_API_URL:?Set NEXT_PUBLIC_TALENT_API_URL in .env.production}
+        NEXT_PUBLIC_AUTH_API_URL: ${NEXT_PUBLIC_AUTH_API_URL:?Set NEXT_PUBLIC_AUTH_API_URL in .env.production}
+        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:?Set NEXT_PUBLIC_API_BASE_URL in .env.production}
+    restart: unless-stopped
     env_file:
-      - .env
-
+      - .env.production
     environment:
-      AUTH_API_BASE_URL: http://inventory:8000
-      INVENTORY_API_BASE_URL: http://inventory:8000
-      SUPPLIERS_API_BASE_URL: http://inventory:8000
-      INCIDENTS_API_BASE_URL: http://incidents:8000
-
-    volumes:
-      - ./uis:/app/uis
-      - ./packages/shared:/app/packages/shared
-      - interfaces_node_modules:/app/node_modules
-      - website_node_modules:/app/uis/website/node_modules
-      - portal_node_modules:/app/uis/backoffices/portal/node_modules
-
-    command: ["sh", "/app/uis/start.sh"]
-
+      AUTH_API_BASE_URL: http://backend:8000
+      INVENTORY_API_BASE_URL: http://backend:8000
+      SUPPLIERS_API_BASE_URL: http://backend:8000
+      INCIDENTS_API_BASE_URL: http://backend:8000
+    ports:
+      - "3001:3001"
     depends_on:
-      - inventory
-      - inventory-db
-      - auth
-      - incidents
-
-    networks:
-      - company_network
-
-
-  inventory:
-    build:
-      context: .
-      dockerfile: services/Dockerfile
-      target: inventory
-    ports:
-      - "8000:8000"
-    environment:
-      DATABASE_URL: postgresql+psycopg2://inventory:inventory_dev@inventory-db:5432/inventory
-      JWT_SECRET: ${JWT_SECRET:?Define JWT_SECRET antes de iniciar Compose}
-    volumes:
-      - auth-data:/app/services/JWTauth_api/data
-    networks:
-      - company_network
-    depends_on:
-      inventory-db:
-        condition: service_healthy
-
-  auth:
-    build:
-      context: .
-      dockerfile: services/Dockerfile
-      target: auth
-    ports:
-      - "8001:8000"
-    environment:
-      JWT_SECRET: ${JWT_SECRET:?Define JWT_SECRET antes de iniciar Compose}
-    volumes:
-      - auth-data:/app/services/JWTauth_api/data
-    networks:
-      - company_network
-
-  incidents:
-    build:
-      context: .
-      dockerfile: services/Dockerfile
-      target: incidents
-    ports:
-      - "8002:8000"
-    environment:
-      INCIDENTS_DB_PATH: /data/incidents.json
-    volumes:
-      - incidents-data:/data
-    networks:
-      - company_network
-
-  inventory-db:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_USER: inventory
-      POSTGRES_PASSWORD: inventory_dev
-      POSTGRES_DB: inventory
-    volumes:
-      - inventory-data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U inventory -d inventory"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-    networks:
-      - company_network
+      - backend
 
 volumes:
-  inventory-data:
   auth-data:
-  website_node_modules:
-  interfaces_node_modules:
-  portal_node_modules:
   incidents-data:
-
-networks:
-  company_network:
-    name: company_network
-    driver: bridge
+  suppliers-data:

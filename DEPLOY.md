@@ -1,67 +1,73 @@
-# Backend y backoffice unificados
+# Despliegue del proyecto
 
-Ejecuta los comandos desde la raiz del repositorio.
+El backend unificado sirve autenticacion, inventario, proveedores e incidencias en el puerto `8000`. El sitio publico usa `3000` y el portal de backoffice `3001`. El inventario se conecta a Supabase; autenticacion, proveedores e incidencias conservan sus datos JSON en volumenes persistentes.
 
-## 1. Backend
+## Desarrollo local sin Docker
 
-Configura `DATABASE_URL`, `JWT_SECRET` y las demas variables del backend antes de iniciar:
+Desde la raiz del repositorio, configura `DATABASE_URL` y `JWT_SECRET` y ejecuta:
 
 ```bash
 myenv/bin/uvicorn services.api.app.main:app --host 0.0.0.0 --port 8000
 ```
 
-Este proceso sirve autenticacion, inventario, proveedores e incidencias. La documentacion esta en `http://localhost:8000/docs`.
-
-## 2. Instalar dependencias del frontend
+En otra terminal, instala el workspace e inicia las interfaces:
 
 ```bash
 corepack pnpm install --frozen-lockfile
+sh uis/start.sh
 ```
 
-No ejecutes instalaciones independientes en las carpetas antiguas.
+El website queda en `http://localhost:3000`; el backoffice, en `http://localhost:3001`. La API unificada esta en `http://localhost:8000/docs`.
 
-## 3. Iniciar el portal
+## Despliegue en una VPS por IP
 
-En otra terminal, para desarrollo:
+El `docker-compose.yaml` de la raiz es la configuracion de despliegue. Construye el backend unificado y las dos aplicaciones Next.js en modo produccion. Publica website `3000`, backoffice `3001` y API `8000`; no inicia un PostgreSQL local porque inventario usa Supabase.
+
+### 1. Preparar las variables
+
+En la VPS, crea `.env.production` en la raiz del repositorio. No lo subas a Git. Define:
+
+| Variable | Valor |
+|---|---|
+| `DATABASE_URL` | URL PostgreSQL de Supabase para inventario; usa la cadena de conexion recomendada por Supabase y SSL. |
+| `JWT_SECRET` | Valor aleatorio largo y persistente entre reinicios. |
+| `CORS_ALLOWED_ORIGINS` | `http://IP_PUBLICA:3000,http://IP_PUBLICA:3001` |
+| `PASSWORD_RESET_URL` | `http://IP_PUBLICA:3001/reset-password` |
+| `NEXT_PUBLIC_TALENT_API_URL` | URL base HTTPS de la API publica de candidaturas, sin `/records`. La API debe permitir CORS desde `http://IP_PUBLICA:3001`. |
+| `NEXT_PUBLIC_AUTH_API_URL` | `http://IP_PUBLICA:8000` |
+| `NEXT_PUBLIC_API_BASE_URL` | `http://IP_PUBLICA:8000` |
+
+Reemplaza `IP_PUBLICA` por la IP real. Las variables `NEXT_PUBLIC_*` se incorporan al bundle del backoffice durante el build; si cambian, hay que reconstruirlo.
+
+### 2. Construir y arrancar
 
 ```bash
-corepack pnpm --filter backoffice-portal dev
+docker compose --env-file .env.production up -d --build
+docker compose --env-file .env.production ps
 ```
 
-Para produccion:
+Consulta los logs con `docker compose --env-file .env.production logs -f`. Prueba `http://IP_PUBLICA:3000`, `http://IP_PUBLICA:3001` y `http://IP_PUBLICA:8000/health`.
+
+### 3. Red de DigitalOcean
+
+Permite TCP entrante a `3000`, `3001` y `8000` en el firewall de la VPS. Si el Droplet tiene un **Cloud Firewall** asociado en el panel de DigitalOcean, agrega tambien esas reglas alli; si no tiene uno, no hay una segunda regla de proveedor que configurar. No abras puertos PostgreSQL (5432) entrantes.
+
+### Datos persistentes y actualizaciones
+
+Compose crea volumenes `auth-data`, `incidents-data` y `suppliers-data`; sobreviven a recrear contenedores. Una clonacion nueva empieza con esas bases JSON vacias. `docker compose down` conserva los volumenes; **no** uses `docker compose down -v`, porque los elimina.
+
+Para desplegar cambios posteriores:
 
 ```bash
-corepack pnpm --filter backoffice-portal build
-corepack pnpm --filter backoffice-portal start
+git pull
+docker compose --env-file .env.production up -d --build
 ```
 
-Todas las interfaces se sirven desde `http://localhost:3000`: `/incidentes`, `/inventario`, `/analizador-incidentes`, `/proveedores` y `/talent-pipeline-tracker`. No se necesitan servidores en los puertos 3101 a 3105. El website es independiente.
+Antes de una demostracion importante, respalda los volumenes JSON y la base Supabase. Los archivos que ya existan en una computadora local no se copian al clonar; solo estarian disponibles en la VPS si se exportan/restauran por separado.
 
-## Configuracion del portal
+## Notas
 
-Configura las variables locales en `uis/backoffices/portal/.env.local` y reinicia el portal:
-
-- `AUTH_API_BASE_URL`, `INVENTORY_API_BASE_URL`, `SUPPLIERS_API_BASE_URL` e `INCIDENTS_API_BASE_URL`: por defecto, `http://127.0.0.1:8000`.
-- `NEXT_PUBLIC_TALENT_API_URL`: URL de la API de candidaturas accesible desde el navegador, sin agregar `/records`. Debe estar definida antes del build de produccion.
-- `PASSWORD_RESET_URL`: se configura en el backend con la URL publica del portal mas `/reset-password`.
-
-Consulta las rutas y detalles en el [README del portal](uis/backoffices/portal/README.md).
-
-## Docker Compose
-
-```bash
-docker compose up --build interfaces
-```
-
-El servicio de interfaces instala el workspace con pnpm y arranca solo el portal (3000) y el website (3001). Compose inicia sus dependencias backend. No uses `down -v` para actualizar: eliminaria tambien volumenes de datos.
-
-Si reutilizas volumenes de dependencias de una imagen anterior, actualizalos sin borrar datos:
-
-```bash
-docker compose run --rm --no-deps interfaces corepack pnpm install --frozen-lockfile
-docker compose up --build interfaces
-```
-
-## Limpieza de la migracion
-
-El codigo ejecutable de las cinco aplicaciones originales se retiro. Sus carpetas pueden conservar archivos restringidos, configuraciones locales, recursos estaticos y caches. No participan del workspace ni del arranque; no se eliminaron automaticamente sus `node_modules`, `.next`, archivos de entorno ni lockfiles npm.
+- El endpoint de la API se publica en el puerto `8000` porque algunas pantallas del backoffice llaman a la API directamente desde el navegador. Si se cambia, deben actualizarse las URL publicas y CORS.
+- El website es independiente del backoffice y no necesita conectarse al backend en su configuracion actual.
+- El sitio funciona por HTTP con la IP para una muestra. El navegador no cifrara la conexion. No pongas contrasenas o datos reales en una red publica sin HTTPS.
+- No se ejecutan seeders al arrancar.

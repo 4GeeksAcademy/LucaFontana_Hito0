@@ -12,13 +12,13 @@ Sin Docker, desde la raíz del repositorio:
 corepack pnpm --filter backoffice-portal dev
 ```
 
-El portal sirve directamente `/incidentes`, `/talent-pipeline-tracker` (incluidas las fichas de candidatos), `/analizador-incidentes`, `/inventario` y `/proveedores` desde `http://localhost:3000`. Todas las interfaces de backoffice corren en un solo proceso Next.js; ya no requieren servidores en los puertos `3101` a `3105`. El backend se inicia por separado.
+El portal sirve directamente `/incidentes`, `/talent-pipeline-tracker` (incluidas las fichas de candidatos), `/analizador-incidentes`, `/inventario` y `/proveedores` desde `http://localhost:3001`. Todas las interfaces de backoffice corren en un solo proceso Next.js; ya no requieren servidores en los puertos `3101` a `3105`. El backend unificado se inicia por separado en el puerto `8000`.
 
-El código ejecutable y los manifests de las aplicaciones originales se retiraron del repositorio y del workspace. Sus carpetas residuales pueden contener recursos, archivos restringidos, configuraciones locales y cachés; ya no son aplicaciones independientes.
+El website independiente se sirve en `http://localhost:3000`.
 
-El script `uis/start.sh` usa rutas de contenedor (`/app/uis`): inicia únicamente el portal y el website por separado en `http://localhost:3001`. Docker instala ambos desde el lockfile pnpm de la raíz, no desde los lockfiles npm antiguos.
+En desarrollo, desde la raíz del repositorio, ejecuta `sh uis/start.sh` para iniciar el website y el backoffice en los puertos `3000` y `3001`. Docker usa el lockfile pnpm de la raíz, no los lockfiles npm antiguos.
 
-Al usar Docker Compose, solo el puerto `3000` queda publicado para el portal de backoffices. El website conserva el puerto `3001`.
+Para desplegar ambas interfaces y el backend unificado en una VPS, sigue [DEPLOY.md](../../../DEPLOY.md).
 
 ### API de Talent tracker
 
