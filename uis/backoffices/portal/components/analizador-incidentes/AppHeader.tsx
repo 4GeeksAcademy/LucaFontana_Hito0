@@ -22,7 +22,7 @@ function isActivePath(pathname: string, href: string) {
 export function AppHeader() {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated } = useAuth();
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/8 bg-[#090909]/85 backdrop-blur-xl">
@@ -59,25 +59,6 @@ export function AppHeader() {
 
           {isAuthenticated ? (
             <>
-              <Link
-                href="/analizador-incidentes/account/profile"
-                className="rounded-full px-4 py-2 text-sm font-medium text-white/70 transition hover:bg-white/5 hover:text-white"
-              >
-                Mi perfil
-              </Link>
-              <Link
-                href="/analizador-incidentes/account/change-password"
-                className="rounded-full px-4 py-2 text-sm font-medium text-white/70 transition hover:bg-white/5 hover:text-white"
-              >
-                Cambiar contraseña
-              </Link>
-              <button
-                type="button"
-                onClick={logout}
-                className="rounded-full px-4 py-2 text-sm font-medium text-white/70 transition hover:bg-white/5 hover:text-white"
-              >
-                Cerrar sesión
-              </button>
             </>
           ) : (
             <Link
@@ -131,23 +112,6 @@ export function AppHeader() {
 
             {isAuthenticated ? (
               <>
-                <Link
-                  href="/analizador-incidentes/account/profile"
-                  className="rounded-2xl px-4 py-3 text-sm font-medium text-white/75 hover:bg-white/5 hover:text-white"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Mi perfil
-                </Link>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsMenuOpen(false);
-                    logout();
-                  }}
-                  className="rounded-2xl px-4 py-3 text-left text-sm font-medium text-white/75 hover:bg-white/5 hover:text-white"
-                >
-                  Cerrar sesión
-                </button>
               </>
             ) : (
               <Link

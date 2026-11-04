@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
+import Link from "next/link";
 
 import { useAuth } from "@/components/proveedores/AuthContext";
 
@@ -51,6 +52,12 @@ export default function ProfilePage() {
       <div>
         <h1 className="font-[var(--font-poppins)] text-3xl font-black text-white">Mi perfil</h1>
         <p className="mt-2 text-white/60">{user.email}</p>
+        <Link
+          href="/proveedores/account/change-password"
+          className="mt-3 inline-flex text-sm font-semibold text-[var(--brand-soft)] hover:underline"
+        >
+          Cambiar contraseña
+        </Link>
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">

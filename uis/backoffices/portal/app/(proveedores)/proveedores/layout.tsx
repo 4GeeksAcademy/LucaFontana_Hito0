@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Poppins } from "next/font/google";
 
-import { AppHeader } from "@/components/proveedores/AppHeader";
+import { GlobalNavbar } from "@/components/GlobalNavbar";
 import { SharedAuthGuard } from "@shared/auth/AuthGuard";
 import { AuthProvider } from "@/components/proveedores/AuthContext";
 import "./globals.css";
@@ -27,7 +27,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="es" className={`${inter.variable} ${poppins.variable} h-full antialiased`}>
       <body className="min-h-full">
         <AuthProvider>
-          <AppHeader />
+          <GlobalNavbar />
           <SharedAuthGuard>{children}</SharedAuthGuard>
         </AuthProvider>
       </body>

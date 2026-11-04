@@ -2,6 +2,8 @@
 
 El portal ofrece un punto de entrada para las aplicaciones de `uis/backoffices` y `uis/talent-pipeline-tracker`.
 
+Las aplicaciones comparten una barra superior con acceso al menú de aplicaciones, perfil y cierre de sesión. El perfil común está disponible en `/proveedores/account/profile`; desde allí se puede editar la información de usuario y cambiar la contraseña.
+
 ## Desarrollo
 
 Sin Docker, desde la raíz del repositorio:

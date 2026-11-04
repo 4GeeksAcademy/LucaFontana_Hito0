@@ -14,7 +14,7 @@ const backoffices = [
 ];
 
 function BackofficeIndex() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
@@ -26,13 +26,6 @@ function BackofficeIndex() {
         </div>
         <div className="flex items-center gap-4">
           <span className="max-w-56 truncate text-sm text-white/60">{user?.email}</span>
-          <button
-            type="button"
-            onClick={logout}
-            className="rounded-full border border-white/10 px-4 py-2 text-sm font-semibold text-white/75 transition hover:border-white/25 hover:text-white"
-          >
-            Cerrar sesión
-          </button>
         </div>
       </header>
 

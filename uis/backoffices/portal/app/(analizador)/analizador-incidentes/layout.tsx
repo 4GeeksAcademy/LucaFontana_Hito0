@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Poppins } from "next/font/google";
 
-import { AppHeader } from "@/components/analizador-incidentes/AppHeader";
+import { GlobalNavbar } from "@/components/GlobalNavbar";
 import { SharedAuthGuard } from "@shared/auth/AuthGuard";
 import { SiteFooter } from "@/components/analizador-incidentes/SiteFooter";
 import { AuthProvider } from "@/components/analizador-incidentes/AuthContext";
@@ -36,7 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(249,115,22,0.18),transparent_28%),radial-gradient(circle_at_20%_20%,rgba(251,146,60,0.12),transparent_22%),linear-gradient(180deg,rgba(10,10,10,0.95),rgba(10,10,10,1))]" />
           <div className="relative flex min-h-full flex-col">
             <AuthProvider>
-              <AppHeader />
+              <GlobalNavbar />
               <main className="flex-1">
                 <SharedAuthGuard>{children}</SharedAuthGuard>
               </main>

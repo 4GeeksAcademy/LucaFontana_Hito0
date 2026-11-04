@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { SharedAuthGuard } from "@shared/auth/AuthGuard";
+import { GlobalNavbar } from "@/components/GlobalNavbar";
 import { CandidateProvider } from "@/components/talent-pipeline-tracker/CandidateContext";
 import "./globals.css";
 
@@ -30,6 +31,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-[var(--color-dark)] text-zinc-50">
+        <GlobalNavbar />
         <SharedAuthGuard>
           <CandidateProvider>{children}</CandidateProvider>
         </SharedAuthGuard>

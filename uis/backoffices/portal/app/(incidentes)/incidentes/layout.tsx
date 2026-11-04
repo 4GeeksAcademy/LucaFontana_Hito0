@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
+import { Inter, Poppins } from "next/font/google";
 import { SharedAuthGuard } from "@shared/auth/AuthGuard";
+import { GlobalNavbar } from "@/components/GlobalNavbar";
 import "./globals.css";
+
+const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
+const poppins = Poppins({ variable: "--font-poppins", subsets: ["latin"], weight: ["600", "700", "800"] });
 
 export const metadata: Metadata = {
   title: "Centro de incidentes | Brasaland Digital",
@@ -11,9 +16,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html
       lang="es"
-      className="h-full antialiased"
+      className={`${inter.variable} ${poppins.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <GlobalNavbar />
         <SharedAuthGuard>{children}</SharedAuthGuard>
       </body>
     </html>

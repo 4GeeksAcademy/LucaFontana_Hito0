@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 
 import { SharedAuthGuard } from "@shared/auth/AuthGuard";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { GlobalNavbar } from "@/components/GlobalNavbar";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -28,6 +29,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     >
       <body className="min-h-full flex flex-col">
         <AuthProvider>
+          <GlobalNavbar />
           <SharedAuthGuard>{children}</SharedAuthGuard>
         </AuthProvider>
       </body>
