@@ -1,4 +1,5 @@
 import { clearStoredToken, getStoredToken } from "./tokenStorage";
+import { getOrLoadAuthUser, invalidateAuthUserCache } from "./userCache";
 import type { AuthUser, ProfileUpdatePayload, RegisterPayload, TokenResponse } from "./types";
 
 export class UnauthorizedError extends Error {
@@ -98,12 +99,21 @@ export function createAuthApiClient(baseUrl: string, onUnauthorized: () => void)
   }
 
   async function getMe(): Promise<AuthUser> {
-    const response = await request("/auth/me");
-    if (!response.ok) {
-      const detail = await extractErrorMessage(response);
-      throw new Error(detail ?? "No se pudo obtener el usuario");
+    const token = getStoredToken();
+    const loadUser = async () => {
+      const response = await request("/auth/me");
+      if (!response.ok) {
+        const detail = await extractErrorMessage(response);
+        throw new Error(detail ?? "No se pudo obtener el usuario");
+      }
+      return (await response.json()) as AuthUser;
+    };
+
+    if (!token) {
+      return loadUser();
     }
-    return response.json();
+
+    return getOrLoadAuthUser(token, loadUser);
   }
 
   async function updateProfile(payload: ProfileUpdatePayload) {
@@ -118,6 +128,7 @@ export function createAuthApiClient(baseUrl: string, onUnauthorized: () => void)
       throw new Error(detail ?? "No se pudo actualizar el perfil");
     }
 
+    invalidateAuthUserCache();
     return response.json();
   }
 

@@ -17,7 +17,6 @@ import {
   createInboundOrder,
   createOutboundOrder,
   getOrders,
-  getProduct,
   getProducts,
   type Ingredient,
   type InventoryOrder,
@@ -351,45 +350,23 @@ export function OutboundOrderPage() {
   const [quantity, setQuantity] = useState("");
   const [reason, setReason] = useState<"consumption" | "waste">("consumption");
   const [locationId, setLocationId] = useState("1");
-  const [availableStock, setAvailableStock] = useState<number | null>(null);
-  const [stockLoading, setStockLoading] = useState(false);
-  const [stockError, setStockError] = useState<string | null>(null);
+  const [stockAdjustments, setStockAdjustments] = useState<Record<string, number>>({});
   const [success, setSuccess] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const selectedProduct = products.find((product) => String(product.id) === ingredientId);
+  const availableStock = selectedProduct
+    ? Math.max(0, selectedProduct.current_stock + (stockAdjustments[ingredientId] ?? 0))
+    : null;
+  const stockLoading = Boolean(ingredientId) && loading;
+  const stockError = !loading && ingredientId && !selectedProduct
+    ? "No se encontró el producto seleccionado."
+    : null;
 
   useEffect(() => {
     const requestedId = new URLSearchParams(window.location.search).get("productId");
     if (requestedId && /^\d+$/.test(requestedId)) setIngredientId(requestedId);
   }, []);
-
-  useEffect(() => {
-    if (!ingredientId) {
-      setAvailableStock(null);
-      setStockError(null);
-      setStockLoading(false);
-      return;
-    }
-
-    let active = true;
-    setAvailableStock(null);
-    setStockError(null);
-    setStockLoading(true);
-    getProduct(Number(ingredientId))
-      .then((product) => {
-        if (active) setAvailableStock(product.current_stock);
-      })
-      .catch((requestError: unknown) => {
-        if (active) setStockError(errorText(requestError, "No se pudo consultar el stock."));
-      })
-      .finally(() => {
-        if (active) setStockLoading(false);
-      });
-
-    return () => {
-      active = false;
-    };
-  }, [ingredientId]);
 
   const quantityNumber = quantity === "" ? null : Number(quantity);
   const exceedsStock = quantityNumber !== null && availableStock !== null && quantityNumber > availableStock;
@@ -415,6 +392,10 @@ export function OutboundOrderPage() {
         reason,
         location_id: Number(locationId),
       });
+      setStockAdjustments((current) => ({
+        ...current,
+        [ingredientId]: (current[ingredientId] ?? 0) - Number(quantity),
+      }));
       setIngredientId("");
       setQuantity("");
       setLocationId("1");

@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowDownToLine, ArrowUpFromLine, Boxes, ClipboardList, Flame, LogOut, Package } from "lucide-react";
+import { ArrowDownToLine, ArrowUpFromLine, ClipboardList, Flame, LogOut, Package, PackagePlus } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { useAuth } from "@/contexts/AuthContext";
 
 const navigation = [
   { href: "/inventario/backoffice/inventory/products", label: "Productos", icon: Package },
+  { href: "/inventario/backoffice/inventory/products/new", label: "Crear producto", icon: PackagePlus },
   { href: "/inventario/backoffice/inventory/orders/inbound", label: "Registrar entrada", icon: ArrowDownToLine },
   { href: "/inventario/backoffice/inventory/orders/outbound", label: "Registrar salida", icon: ArrowUpFromLine },
   { href: "/inventario/backoffice/inventory/orders", label: "Historial", icon: ClipboardList },
@@ -17,7 +18,11 @@ const navigation = [
 function NavigationLinks({ compact = false }: { compact?: boolean }) {
   const pathname = usePathname();
   return navigation.map(({ href, label, icon: Icon }) => {
-    const active = pathname === href || (href.endsWith("/products") && pathname.startsWith(`${href}/`));
+    const active = pathname === href || (
+      href.endsWith("/products") &&
+      pathname.startsWith(`${href}/`) &&
+      pathname !== `${href}/new`
+    );
     return (
       <Link
         key={href}
@@ -58,14 +63,6 @@ export function BackofficeShell({ children }: { children: ReactNode }) {
           </nav>
           <div className="mt-auto border-t border-white/[0.07] pt-4">
             <p className="truncate px-3 text-xs text-white/65" title={user?.email}>{user?.email}</p>
-            <button
-              type="button"
-              onClick={logout}
-              className="mt-3 flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm text-white/60 transition hover:bg-white/[0.04] hover:text-white"
-            >
-              <LogOut size={17} aria-hidden="true" />
-              Cerrar sesión
-            </button>
           </div>
         </aside>
 

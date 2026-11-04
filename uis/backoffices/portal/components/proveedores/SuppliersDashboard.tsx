@@ -585,7 +585,7 @@ export function SuppliersDashboard({ apiBaseUrl }: SuppliersDashboardProps) {
                 <div className="space-y-2">
                   <h2 className="font-[var(--font-poppins)] text-2xl font-semibold text-white">Filtros dinámicos</h2>
                   <p className="text-sm leading-6 text-zinc-400">
-                    Ajusta país y categoría sin recargar la página. Los cambios se consultan de inmediato contra la API.
+                    Ajusta país y categoría sin recargar la página.
                   </p>
                 </div>
 

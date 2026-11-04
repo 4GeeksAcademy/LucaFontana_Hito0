@@ -1,6 +1,7 @@
 import { clearStoredToken, getStoredToken } from "@shared/auth";
 
 const API_PATH = "/api/inventory";
+const PRODUCTS_CACHE_TTL_MS = 5 * 60 * 1000;
 
 export type Ingredient = {
   id: number;
@@ -11,6 +12,8 @@ export type Ingredient = {
   country: string;
   current_stock: number;
 };
+
+export type ProductCreatePayload = Pick<Ingredient, "name" | "sku" | "unit" | "category" | "country">;
 
 export type InboundOrderPayload = {
   ingredient_id: number;
@@ -40,6 +43,23 @@ export class InventoryApiError extends Error {
     super(message);
     this.name = "InventoryApiError";
   }
+}
+
+type ProductsRequest = {
+  token: string | null;
+  promise: Promise<Ingredient[]>;
+};
+
+let productsCache: {
+  token: string | null;
+  products: Ingredient[];
+  expiresAt: number;
+} | null = null;
+let productsRequest: ProductsRequest | null = null;
+
+function invalidateProductsCache(): void {
+  productsCache = null;
+  productsRequest = null;
 }
 
 async function errorMessage(response: Response): Promise<string> {
@@ -87,11 +107,48 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
 }
 
 export function getProducts(): Promise<Ingredient[]> {
-  return request("/products");
+  const token = getStoredToken();
+
+  if (
+    productsCache?.token === token &&
+    productsCache.expiresAt > Date.now()
+  ) {
+    return Promise.resolve(productsCache.products);
+  }
+
+  if (productsRequest?.token === token) {
+    return productsRequest.promise;
+  }
+
+  const promise = request<Ingredient[]>("/products")
+    .then((products) => {
+      if (productsRequest?.promise === promise && getStoredToken() === token) {
+        productsCache = {
+          token,
+          products,
+          expiresAt: Date.now() + PRODUCTS_CACHE_TTL_MS,
+        };
+      }
+      return products;
+    })
+    .finally(() => {
+      if (productsRequest?.promise === promise) {
+        productsRequest = null;
+      }
+    });
+
+  productsRequest = { token, promise };
+  return promise;
 }
 
-export function getProduct(productId: number): Promise<Ingredient> {
-  return request(`/products/${productId}`);
+export function createProduct(payload: ProductCreatePayload): Promise<Ingredient> {
+  return request<Ingredient>("/products", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  }).then((product) => {
+    invalidateProductsCache();
+    return product;
+  });
 }
 
 export function getOrders(): Promise<InventoryOrder[]> {
@@ -99,9 +156,15 @@ export function getOrders(): Promise<InventoryOrder[]> {
 }
 
 export function createInboundOrder(payload: InboundOrderPayload): Promise<unknown> {
-  return request("/orders/inbound", { method: "POST", body: JSON.stringify(payload) });
+  return request("/orders/inbound", { method: "POST", body: JSON.stringify(payload) }).then((result) => {
+    invalidateProductsCache();
+    return result;
+  });
 }
 
 export function createOutboundOrder(payload: OutboundOrderPayload): Promise<unknown> {
-  return request("/orders/outbound", { method: "POST", body: JSON.stringify(payload) });
+  return request("/orders/outbound", { method: "POST", body: JSON.stringify(payload) }).then((result) => {
+    invalidateProductsCache();
+    return result;
+  });
 }

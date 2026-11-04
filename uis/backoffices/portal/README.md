@@ -44,11 +44,11 @@ La implementación activa del tracker vive dentro del portal; no requiere import
 - `/talent-pipeline-tracker` — seguimiento de candidaturas.
 - `/login`, `/register`, `/forgot-password` y `/reset-password` — acceso y gestión centralizados de cuenta.
 
-El portal reutiliza el token `auth_token` almacenado en `localStorage` por los backoffices existentes. Las pantallas se protegen en el cliente; los servicios API conservan sus propios puertos y controles.
+El portal reutiliza el token `auth_token` almacenado en `localStorage` por los backoffices existentes. Las consultas de perfil de sesión se deduplican y se guardan en memoria durante 2 minutos; cerrar sesión, cambiar el token, recibir un `401` o actualizar el perfil invalida esa caché. Las pantallas se protegen en el cliente; los servicios API conservan sus propios puertos y controles y deben validar cada operación protegida.
 
 Proveedores usa `/api/suppliers`, `/api/suppliers/rate` y `/api/suppliers/status` en el mismo puerto del portal. El servidor reenvía las peticiones a `SUPPLIERS_API_BASE_URL` (por defecto, `http://127.0.0.1:8000`; también se acepta `NEXT_PUBLIC_SUPPLIERS_API_URL` como alternativa). Configura la variable en el entorno del portal si necesitas otro backend y reinícialo. Las rutas antiguas bajo `/proveedores/api/suppliers` siguen disponibles. Se conservan el directorio, filtros, búsqueda por id, altas, bajas, tarifas y estados; el login, registro y recuperación utilizan las pantallas centrales.
 
-Inventario usa el contexto de autenticación del portal y `/api/inventory/` en el mismo puerto. El servidor reenvía las peticiones a `INVENTORY_API_BASE_URL` (por defecto, `http://127.0.0.1:8000`). Configura esa variable en el entorno del portal si necesitas otro backend. Se conservan las rutas antiguas `/inventario/api/inventory/`.
+Inventario usa el contexto de autenticación del portal y `/api/inventory/` en el mismo puerto. El servidor reenvía las peticiones a `INVENTORY_API_BASE_URL` (por defecto, `http://127.0.0.1:8000`). Configura esa variable en el entorno del portal si necesitas otro backend. Se conservan las rutas antiguas `/inventario/api/inventory/`. El catálogo y su stock se reutilizan en memoria por cinco minutos y se invalida al registrar entradas o salidas; las salidas siguen siendo validadas por el servidor al guardar.
 
 El analizador usa `/api/incidents/analyze` y `/api/incidents/results/export` en el mismo puerto del portal. El servidor reenvía estas peticiones a `INCIDENTS_API_BASE_URL` (por defecto, `http://127.0.0.1:8000`). Si necesitas otra dirección, configura esa variable en el entorno del portal y reinícialo. Las rutas antiguas bajo `/analizador-incidentes/api/incidents/` siguen disponibles.
 
