@@ -18,6 +18,8 @@ else:
     from services.JWTauth_api.auth import router as auth_router
     from routes.suppliers import router as suppliers_router
 
+from packages.shared.timing import add_timing_middleware
+
 
 app = FastAPI(
     title="Brasaland Digital Suppliers API",
@@ -42,3 +44,8 @@ def healthcheck() -> dict[str, str]:
 app.include_router(suppliers_router)
 if os.getenv("ENABLE_AUTH_ROUTES", "true").lower() == "true":
     app.include_router(auth_router)
+add_timing_middleware(
+    app,
+    "suppliers",
+    Path(__file__).resolve().parent / "logs" / "timing.log",
+)

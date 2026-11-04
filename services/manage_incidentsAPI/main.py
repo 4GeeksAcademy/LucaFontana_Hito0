@@ -16,6 +16,7 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from packages.shared.constants import BRANCHES, CATEGORIES, ORIGINS, STATUSES
 from packages.shared.validators import validate_incident_data, validate_status_transition
+from packages.shared.timing import add_timing_middleware
 from services.manage_incidentsAPI.database import get_db, get_incidents
 from services.manage_incidentsAPI.schemas import (
     BranchCounts,
@@ -172,3 +173,8 @@ def update_status(
 
 
 app.include_router(router)
+add_timing_middleware(
+    app,
+    "incidents",
+    Path(__file__).resolve().parent / "logs" / "timing.log",
+)
