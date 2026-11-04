@@ -1,5 +1,6 @@
 .env*
 !.env.example
+!.env.production.example
 *.pyc
 __pycache__/
 
@@ -16,6 +17,8 @@ myenv/
 
 # Local tooling caches
 .turbo/
+logs/
+services/*/logs/
 
 services/JWTauth_api/data/db.json
 

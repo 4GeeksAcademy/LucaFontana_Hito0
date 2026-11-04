@@ -1,63 +1,42 @@
 # Guia de instalacion y ejecucion
 
-Esta guia describe como preparar y ejecutar la API de inventario junto con la autenticacion compartida de `services/JWTauth_api`.
+Esta guia describe el modulo de inventario. En el uso habitual forma parte del backend unificado junto con auth, proveedores y las APIs de incidencias.
 
 ## Requisitos
 
 - Python 3.12 o superior.
 - Acceso de red a la base PostgreSQL configurada para inventario.
-- Los archivos `.env` locales configurados para inventario y JWTauth.
+- Las variables de entorno requeridas por el backend unificado, incluyendo `DATABASE_URL` y `JWT_SECRET`.
 
 La API usa PostgreSQL para los ingredientes y movimientos. JWTauth mantiene usuarios y perfiles en su propia base TinyDB.
 
-## Crear y activar el entorno
+## Preparar el entorno
 
-Ejecuta los comandos desde la carpeta del servicio:
+Desde la raíz del repositorio, crea el entorno virtual si todavía no existe, actívalo e instala las dependencias de toda la aplicación:
 
 ```bash
-cd services/inventory_management_API
 python3 -m venv myenv
 source myenv/bin/activate
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
+python -m pip install -r services/api/requirements.txt
 ```
 
-Crea `myenv` solo la primera vez. En las siguientes sesiones, activa el entorno e instala cualquier dependencia nueva con el mismo interprete:
-
-```bash
-cd services/inventory_management_API
-source myenv/bin/activate
-python -m pip install -r requirements.txt
-```
-
-Comprueba que el entorno activo tiene las dependencias:
-
-```bash
-python -c "import fastapi, sqlmodel, psycopg2; print('Dependencias disponibles')"
-```
-
-Usa `python -m pip` y `python -m uvicorn` para asegurarte de que los comandos usan el Python de `myenv`. Si aparece `ModuleNotFoundError: No module named 'sqlmodel'`, activa `myenv` e instala `requirements.txt` de nuevo.
+En sesiones siguientes basta con activar `myenv`. Si aparece `ModuleNotFoundError`, vuelve a instalar `services/api/requirements.txt` desde la raíz.
 
 ## Variables de entorno
 
-Antes de iniciar el backend, configura:
+Antes de iniciar el backend unificado, proporciona `DATABASE_URL` y `JWT_SECRET` al proceso, por ejemplo mediante la configuración local de entorno. No publiques secretos. Si la contraseña de PostgreSQL contiene caracteres especiales, codifícalos para URL dentro de `DATABASE_URL`.
 
-- `services/inventory_management_API/.env`: debe incluir `DATABASE_URL` con la URL de PostgreSQL para inventario.
-- `services/JWTauth_api/.env`: debe incluir `JWT_SECRET`, la clave con la que JWTauth firma y valida los tokens.
-
-JWTauth carga su propio `.env`; no hace falta copiar `JWT_SECRET` al archivo de inventario. No publiques ninguno de estos archivos ni sus valores. Si la contraseña de PostgreSQL contiene caracteres especiales, codificalos para URL dentro de `DATABASE_URL`.
-
-Arranca el servicio desde `services/inventory_management_API`: su `database.py` carga el `.env` del directorio actual. Al importar la aplicacion se crean las tablas de inventario si todavia no existen, por lo que la base debe estar accesible y el usuario debe tener permisos para crear tablas.
+Al iniciar la aplicación unificada se crean las tablas de inventario si todavía no existen; la base debe estar accesible y el usuario debe tener permisos para crear tablas.
 
 ## Iniciar la API y abrir Swagger
 
-Con `myenv` activo y la terminal situada en `services/inventory_management_API`:
+Desde la raíz del repositorio, inicia el backend completo con:
 
 ```bash
-python -m uvicorn main:app --reload
+myenv/bin/uvicorn services.api.app.main:app --host 0.0.0.0 --port 8000
 ```
 
-Uvicorn escucha en el puerto `8000`. Abre Swagger UI en:
+Este único proceso levanta inventario junto con autenticación, proveedores y las APIs de incidencias. Todos los endpoints están en el puerto `8000`. Abre Swagger UI en:
 
 ```text
 http://127.0.0.1:8000/docs
@@ -65,7 +44,7 @@ http://127.0.0.1:8000/docs
 
 La documentacion alternativa esta en `http://127.0.0.1:8000/redoc`. En Codespaces, abre o reenvia el puerto 8000 y usa la URL que muestra VS Code.
 
-Para detener el servidor, pulsa `Ctrl+C`. Para salir del entorno virtual, ejecuta `deactivate`.
+Para detener el backend, pulsa `Ctrl+C`.
 
 ## Autenticacion
 
@@ -113,8 +92,8 @@ Las cantidades de entradas y salidas no pueden ser negativas. El stock se calcul
 
 ## Solucion de problemas
 
-- **`No module named 'sqlmodel'`**: confirma que `myenv` esta activo (`which python` debe apuntar a `services/inventory_management_API/myenv/bin/python`) y vuelve a ejecutar `python -m pip install -r requirements.txt`.
-- **`DATABASE_URL no esta configurada`**: confirma que el archivo `services/inventory_management_API/.env` existe, contiene `DATABASE_URL` y que arrancaste desde la carpeta del servicio.
-- **Error al conectar con PostgreSQL**: revisa la URL, la conectividad de red, el estado del servidor y que la dependencia `psycopg2-binary` este instalada en `myenv`.
+- **`No module named 'sqlmodel'`**: confirma que el `myenv` de la raíz está activo y ejecuta `python -m pip install -r services/api/requirements.txt` desde la raíz.
+- **`DATABASE_URL no esta configurada`**: confirma que `DATABASE_URL` está disponible para el proceso del backend antes de iniciarlo desde la raíz.
+- **Error al conectar con PostgreSQL**: revisa la URL, la conectividad de red, el estado del servidor y que las dependencias de `services/api/requirements.txt` estén instaladas en `myenv`.
 - **`401 Unauthorized` en una escritura**: inicia sesion en `/auth/login`, autoriza Swagger con el token y comprueba que `JWT_SECRET` corresponde al configurado en JWTauth.
 - **El seed dice que ya hay ingredientes**: es el comportamiento esperado si la tabla no esta vacia; el seed no es una herramienta de reinicio de la base.

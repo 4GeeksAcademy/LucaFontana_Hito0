@@ -1,8 +1,16 @@
 import os
+import sys
+from pathlib import Path
 
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+if str(PROJECT_ROOT) not in sys.path:
+	sys.path.insert(0, str(PROJECT_ROOT))
+
+from packages.shared.timing import add_timing_middleware
 
 load_dotenv()
 
@@ -39,3 +47,4 @@ app.add_middleware(
 app.include_router(auth_router)
 app.include_router(users_router)
 app.include_router(profiles_router)
+add_timing_middleware(app, "jwt-auth", Path(__file__).resolve().parent / "logs" / "timing.log")

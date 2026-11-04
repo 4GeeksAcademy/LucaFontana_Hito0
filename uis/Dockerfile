@@ -1,29 +1,40 @@
-FROM node:22-alpine
+FROM node:24-alpine AS base
 
 WORKDIR /app
 
-# Copiamos primero los archivos de dependencias para aprovechar la cache de Docker.
-COPY website/package*.json ./website/
-COPY backoffices/administrar_inventario/package*.json ./backoffices/administrar_inventario/
-COPY backoffices/administrar_incidentes/package*.json ./backoffices/administrar_incidentes/
-COPY backoffices/analizador_incidentes/package*.json ./backoffices/analizador_incidentes/
-COPY backoffices/suppliers_tinydb/package*.json ./backoffices/suppliers_tinydb/
+RUN corepack enable
 
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY packages/shared/package.json ./packages/shared/
+COPY uis/website/package.json ./uis/website/
+COPY uis/backoffices/portal/package.json ./uis/backoffices/portal/
 
-# Instalamos las dependencias de cada aplicación por separado.
-RUN npm install --prefix ./website
-RUN npm install --prefix ./backoffices/administrar_inventario
-RUN npm install --prefix ./backoffices/administrar_incidentes
-RUN npm install --prefix ./backoffices/analizador_incidentes
-RUN npm install --prefix ./backoffices/suppliers_tinydb
+RUN corepack pnpm install --frozen-lockfile
 
-# Ahora copiamos el resto del código.
-COPY . .
+COPY packages/shared ./packages/shared
 
+FROM base AS website
+
+COPY uis/website ./uis/website
+RUN corepack pnpm --filter website build
+
+ENV NODE_ENV=production
 EXPOSE 3000
-EXPOSE 3001
-EXPOSE 3002
-EXPOSE 3003
-EXPOSE 3004
+CMD ["corepack", "pnpm", "--dir", "/app/uis/website", "start", "--hostname", "0.0.0.0", "--port", "3000"]
 
-CMD ["sh", "/app/start.sh"]
+FROM base AS portal
+
+COPY uis/backoffices/portal ./uis/backoffices/portal
+
+ARG NEXT_PUBLIC_TALENT_API_URL
+ARG NEXT_PUBLIC_AUTH_API_URL
+ARG NEXT_PUBLIC_API_BASE_URL
+ENV NEXT_PUBLIC_TALENT_API_URL=${NEXT_PUBLIC_TALENT_API_URL}
+ENV NEXT_PUBLIC_AUTH_API_URL=${NEXT_PUBLIC_AUTH_API_URL}
+ENV NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
+
+RUN corepack pnpm --filter backoffice-portal build
+
+ENV NODE_ENV=production
+EXPOSE 3001
+CMD ["corepack", "pnpm", "--dir", "/app/uis/backoffices/portal", "start", "--hostname", "0.0.0.0", "--port", "3001"]

@@ -177,10 +177,8 @@ def create_outbound_order(
 
     return IngredientExitResponse.model_validate(order)
 
-@router.get("/orders")
-def get_orders(
-    db: Session = Depends(get_db),
-):
+@router.get("/orders", response_model=list[OrderResponse])
+def get_orders(db: Session = Depends(get_db)) -> list[OrderResponse]:
     entry_statement = (
         select(IngredientEntry, Ingredient)
         .join(
@@ -240,4 +238,4 @@ def get_orders(
         key=lambda movement: movement["created_at"]
     )
 
-    return movements
+    return [OrderResponse.model_validate(movement) for movement in movements]

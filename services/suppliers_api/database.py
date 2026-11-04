@@ -1,13 +1,17 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+import os
 from pathlib import Path
 from typing import Any
 
 from tinydb import TinyDB
 from tinydb.table import Document, Table
 
-DB_PATH = Path(__file__).resolve().parent / "db.json"
+DB_PATH = Path(
+    os.environ.get("SUPPLIERS_DB_PATH", str(Path(__file__).resolve().parent / "db.json"))
+)
+DB_PATH.parent.mkdir(parents=True, exist_ok=True)
 _db = TinyDB(DB_PATH)
 
 

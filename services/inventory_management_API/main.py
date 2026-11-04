@@ -1,3 +1,4 @@
+import os
 import sys
 from pathlib import Path
 
@@ -19,8 +20,16 @@ else:
 	import models
 	from routers.inventory import router as inventory_router
 
+from packages.shared.timing import add_timing_middleware
+
 SQLModel.metadata.create_all(engine)
 app = FastAPI()
 
 app.include_router(inventory_router)
-app.include_router(auth_router)
+if os.getenv("ENABLE_AUTH_ROUTES", "true").lower() == "true":
+	app.include_router(auth_router)
+add_timing_middleware(
+	app,
+	"inventory",
+	Path(__file__).resolve().parent / "logs" / "timing.log",
+)

@@ -1,4 +1,14 @@
-# Deploy Local - Suppliers API
+# Ejecución de Suppliers API
+
+La API de proveedores forma parte del backend unificado. Para iniciar proveedores junto con auth, inventario e incidencias, ejecuta desde la raíz del repositorio:
+
+```bash
+myenv/bin/uvicorn services.api.app.main:app --host 0.0.0.0 --port 8000
+```
+
+Todos los endpoints quedan disponibles al mismo tiempo en `http://localhost:8000`; Swagger está en `http://localhost:8000/docs`. No ejecutes el servidor independiente de proveedores para el flujo unificado.
+
+## Ejecución aislada (solo desarrollo del módulo)
 
 ## 1) Activar entorno virtual myenv
 

@@ -1,4 +1,5 @@
 import { clearStoredToken, getStoredToken } from "./tokenStorage";
+import { getOrLoadAuthUser, invalidateAuthUserCache } from "./userCache";
 import type { AuthUser, ProfileUpdatePayload, RegisterPayload, TokenResponse } from "./types";
 
 export class UnauthorizedError extends Error {
@@ -32,6 +33,9 @@ export type AuthApiClient = ReturnType<typeof createAuthApiClient>;
  */
 export function createAuthApiClient(baseUrl: string, onUnauthorized: () => void) {
   const normalizedBaseUrl = baseUrl.replace(/\/+$/, "");
+  // The Next.js proxy is already mounted at /api/auth, so avoid /api/auth/auth/*.
+  const isAuthProxy = normalizedBaseUrl.endsWith("/api/auth");
+  const resolvePath = (path: string) => (isAuthProxy ? path.replace(/^\/auth(?=\/)/, "") : path);
 
   async function request(path: string, init: RequestInit = {}, requireAuth = true): Promise<Response> {
     const headers = new Headers(init.headers);
@@ -44,7 +48,7 @@ export function createAuthApiClient(baseUrl: string, onUnauthorized: () => void)
 
     let response: Response;
     try {
-      response = await fetch(`${normalizedBaseUrl}${path}`, { ...init, headers });
+      response = await fetch(`${normalizedBaseUrl}${resolvePath(path)}`, { ...init, headers });
     } catch {
       throw new Error(AUTH_SERVICE_ERROR_MESSAGE);
     }
@@ -95,12 +99,21 @@ export function createAuthApiClient(baseUrl: string, onUnauthorized: () => void)
   }
 
   async function getMe(): Promise<AuthUser> {
-    const response = await request("/auth/me");
-    if (!response.ok) {
-      const detail = await extractErrorMessage(response);
-      throw new Error(detail ?? "No se pudo obtener el usuario");
+    const token = getStoredToken();
+    const loadUser = async () => {
+      const response = await request("/auth/me");
+      if (!response.ok) {
+        const detail = await extractErrorMessage(response);
+        throw new Error(detail ?? "No se pudo obtener el usuario");
+      }
+      return (await response.json()) as AuthUser;
+    };
+
+    if (!token) {
+      return loadUser();
     }
-    return response.json();
+
+    return getOrLoadAuthUser(token, loadUser);
   }
 
   async function updateProfile(payload: ProfileUpdatePayload) {
@@ -115,6 +128,7 @@ export function createAuthApiClient(baseUrl: string, onUnauthorized: () => void)
       throw new Error(detail ?? "No se pudo actualizar el perfil");
     }
 
+    invalidateAuthUserCache();
     return response.json();
   }
 

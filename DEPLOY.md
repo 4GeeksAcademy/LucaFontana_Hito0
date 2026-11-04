@@ -1,102 +1,73 @@
-# Deploy de `backoffices/my-app`
+# Despliegue del proyecto
 
-## APIs locales con Docker Compose
+El backend unificado sirve autenticacion, inventario, proveedores e incidencias en el puerto `8000`. El sitio publico usa `3000` y el portal de backoffice `3001`. El inventario se conecta a Supabase; autenticacion, proveedores e incidencias conservan sus datos JSON en volumenes persistentes.
 
-Desde la raiz del repositorio, con Docker y Docker Compose disponibles:
+## Desarrollo local sin Docker
 
-```bash
-export JWT_SECRET="$(python3 -c 'import secrets; print(secrets.token_hex(32))')"
-docker compose up --build -d
-docker compose ps
-```
-
-Conserva el mismo `JWT_SECRET` entre reinicios para no invalidar tokens existentes.
-Tambien puedes definirlo en un archivo `.env` local en la raiz (no versionado).
-
-- Inventario: http://localhost:8000/docs
-- Autenticacion JWT: http://localhost:8001/docs
-- Incidencias: http://localhost:8002/docs
-
-Un unico `services/Dockerfile` contiene tres destinos de construccion:
-`inventory`, `auth` e `incidents`. Compose construye una imagen por destino y
-ejecuta cada API en su propio contenedor. Todas escuchan internamente en el
-puerto 8000; los puertos publicados del host son distintos. PostgreSQL se inicia
-en un cuarto contenedor, sin publicar su puerto al host.
-
-Los volumenes conservan los datos al ejecutar `docker compose down`. Las bases
-empiezan vacias; no se copian datos locales ni archivos `.env` a las imagenes.
-Para consultar registros o detener los servicios:
+Desde la raiz del repositorio, configura `DATABASE_URL` y `JWT_SECRET` y ejecuta:
 
 ```bash
-docker compose logs -f inventory auth incidents
-docker compose down
+myenv/bin/uvicorn services.api.app.main:app --host 0.0.0.0 --port 8000
 ```
 
-Esta configuracion es para desarrollo local: cambia las credenciales de
-PostgreSQL y revisa la exposicion de puertos antes de desplegarla en produccion.
-Inventario importa actualmente el modulo JWT y consulta su TinyDB, por eso ambos
-montan `auth-data` y reciben el mismo secreto. TinyDB no garantiza escrituras
-concurrentes entre procesos: realiza altas y cambios de usuarios desde `auth`,
-no desde las rutas `/auth` duplicadas en inventario. Para produccion, centraliza
-la autenticacion o migra los usuarios a una base que soporte concurrencia.
-
-El frontend no forma parte de este Compose; puede iniciarse como se indica abajo.
-
-Este proyecto depende de dos procesos separados:
-
-- el backend FastAPI, que debe iniciarse desde la raíz del repositorio;
-- el frontend Next.js, que vive en `uis/backoffices/my-app`.
-
-## 1. Iniciar el backend desde la raíz del proyecto
-
-Antes de levantar o desplegar el frontend, inicia el servidor API desde la raíz del repositorio:
+En otra terminal, instala el workspace e inicia las interfaces:
 
 ```bash
-cd /workspaces/LucaFontana_Hito0
-python -m uvicorn services.api.app.main:app --host 0.0.0.0 --port 8000
+corepack pnpm install --frozen-lockfile
+sh uis/start.sh
 ```
 
-Esto es necesario porque el proyecto Next consume el backend de incidencias a través de sus route handlers internos.
+El website queda en `http://localhost:3000`; el backoffice, en `http://localhost:3001`. La API unificada esta en `http://localhost:8000/docs`.
 
-## 2. Build y arranque del proyecto Next.js
+## Despliegue en una VPS por IP
 
-En otra terminal, entra al proyecto de backoffice:
+El `docker-compose.yaml` de la raiz es la configuracion de despliegue. Construye el backend unificado y las dos aplicaciones Next.js en modo produccion. Publica website `3000`, backoffice `3001` y API `8000`; no inicia un PostgreSQL local porque inventario usa Supabase.
+
+### 1. Preparar las variables
+
+En la VPS, crea `.env.production` en la raiz del repositorio. No lo subas a Git. Define:
+
+| Variable | Valor |
+|---|---|
+| `DATABASE_URL` | URL PostgreSQL de Supabase para inventario; usa la cadena de conexion recomendada por Supabase y SSL. |
+| `JWT_SECRET` | Valor aleatorio largo y persistente entre reinicios. |
+| `CORS_ALLOWED_ORIGINS` | `http://IP_PUBLICA:3000,http://IP_PUBLICA:3001` |
+| `PASSWORD_RESET_URL` | `http://IP_PUBLICA:3001/reset-password` |
+| `NEXT_PUBLIC_TALENT_API_URL` | URL base HTTPS de la API publica de candidaturas, sin `/records`. La API debe permitir CORS desde `http://IP_PUBLICA:3001`. |
+| `NEXT_PUBLIC_AUTH_API_URL` | `http://IP_PUBLICA:8000` |
+| `NEXT_PUBLIC_API_BASE_URL` | `http://IP_PUBLICA:8000` |
+
+Reemplaza `IP_PUBLICA` por la IP real. Las variables `NEXT_PUBLIC_*` se incorporan al bundle del backoffice durante el build; si cambian, hay que reconstruirlo.
+
+### 2. Construir y arrancar
 
 ```bash
-cd /workspaces/LucaFontana_Hito0/uis/backoffices/my-app
+docker compose --env-file .env.production up -d --build
+docker compose --env-file .env.production ps
 ```
 
-Instala dependencias si todavía no lo hiciste:
+Consulta los logs con `docker compose --env-file .env.production logs -f`. Prueba `http://IP_PUBLICA:3000`, `http://IP_PUBLICA:3001` y `http://IP_PUBLICA:8000/health`.
+
+### 3. Red de DigitalOcean
+
+Permite TCP entrante a `3000`, `3001` y `8000` en el firewall de la VPS. Si el Droplet tiene un **Cloud Firewall** asociado en el panel de DigitalOcean, agrega tambien esas reglas alli; si no tiene uno, no hay una segunda regla de proveedor que configurar. No abras puertos PostgreSQL (5432) entrantes.
+
+### Datos persistentes y actualizaciones
+
+Compose crea volumenes `auth-data`, `incidents-data` y `suppliers-data`; sobreviven a recrear contenedores. Una clonacion nueva empieza con esas bases JSON vacias. `docker compose down` conserva los volumenes; **no** uses `docker compose down -v`, porque los elimina.
+
+Para desplegar cambios posteriores:
 
 ```bash
-npm install
+git pull
+docker compose --env-file .env.production up -d --build
 ```
 
-Genera el build de producción:
+Antes de una demostracion importante, respalda los volumenes JSON y la base Supabase. Los archivos que ya existan en una computadora local no se copian al clonar; solo estarian disponibles en la VPS si se exportan/restauran por separado.
 
-```bash
-npm run build
-```
+## Notas
 
-Y luego arranca el proyecto con:
-
-```bash
-npm run start
-```
-
-El orden importa: primero debe estar levantado el servidor desde la raíz del proyecto y después debe hacerse el deploy o arranque del proyecto Next con `npm run start` para que funcione correctamente.
-
-## 3. Variable opcional de backend
-
-Si el backend no corre en `http://127.0.0.1:8000`, define esta variable antes de arrancar Next:
-
-```bash
-INCIDENTS_API_BASE_URL=http://tu-backend:8000
-```
-
-Por ejemplo:
-
-```bash
-cd /workspaces/LucaFontana_Hito0/uis/backoffices/my-app
-INCIDENTS_API_BASE_URL=http://127.0.0.1:8000 npm run start
-```
+- El endpoint de la API se publica en el puerto `8000` porque algunas pantallas del backoffice llaman a la API directamente desde el navegador. Si se cambia, deben actualizarse las URL publicas y CORS.
+- El website es independiente del backoffice y no necesita conectarse al backend en su configuracion actual.
+- El sitio funciona por HTTP con la IP para una muestra. El navegador no cifrara la conexion. No pongas contrasenas o datos reales en una red publica sin HTTPS.
+- No se ejecutan seeders al arrancar.

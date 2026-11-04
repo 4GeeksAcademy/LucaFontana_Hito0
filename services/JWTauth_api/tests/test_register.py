@@ -14,9 +14,10 @@ def test_registration_creates_normalized_user_and_profile(isolated_tables):
 
 	result = create_user(payload)
 
-	assert result.email == "new.user+tag@example.com"
-	assert result.profile is not None
-	assert services.authenticate_user(result.email, payload.password)["id"] == result.id
+	stored_user = services.get_user_by_id(result.id)
+	assert stored_user["email"] == "new.user+tag@example.com"
+	assert services.get_profile_by_user_id(result.id) is not None
+	assert services.authenticate_user(stored_user["email"], payload.password)["id"] == result.id
 
 
 def test_registration_rejects_duplicate_email_after_normalization(seeded_user):

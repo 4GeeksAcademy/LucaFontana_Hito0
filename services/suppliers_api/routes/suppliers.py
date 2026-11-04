@@ -9,7 +9,7 @@ if __package__:
         utc_now_iso,
     )
     from services.suppliers_api.models import (
-        Supplier,
+        SupplierResponse,
         SupplierCreate,
         SupplierRateUpdate,
         SupplierStatusUpdate,
@@ -17,7 +17,7 @@ if __package__:
     from services.JWTauth_api.auth import get_current_user
 else:
     from database import document_to_supplier_payload, get_suppliers_table, utc_now_iso
-    from models import Supplier, SupplierCreate, SupplierRateUpdate, SupplierStatusUpdate
+    from models import SupplierCreate, SupplierRateUpdate, SupplierResponse, SupplierStatusUpdate
     from JWTauth_api.auth import get_current_user
 
 
@@ -28,16 +28,16 @@ router = APIRouter(
 )
 
 
-def get_supplier_or_404(supplier_id: int) -> Supplier:
+def get_supplier_or_404(supplier_id: int) -> SupplierResponse:
     document = get_suppliers_table().get(doc_id=supplier_id)
     if document is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Supplier not found")
 
-    return Supplier.model_validate(document_to_supplier_payload(document))
+    return SupplierResponse.model_validate(document_to_supplier_payload(document))
 
 
-@router.post("", response_model=Supplier, status_code=status.HTTP_201_CREATED)
-def create_supplier(payload: SupplierCreate) -> Supplier:
+@router.post("", response_model=SupplierResponse, status_code=status.HTTP_201_CREATED)
+def create_supplier(payload: SupplierCreate) -> SupplierResponse:
     suppliers_table = get_suppliers_table()
 
     supplier_payload = payload.model_dump()
@@ -46,16 +46,16 @@ def create_supplier(payload: SupplierCreate) -> Supplier:
     supplier_id = suppliers_table.insert(supplier_payload)
     supplier_payload["id"] = supplier_id
 
-    return Supplier.model_validate(supplier_payload)
+    return SupplierResponse.model_validate(supplier_payload)
 
 
-@router.get("", response_model=list[Supplier])
+@router.get("", response_model=list[SupplierResponse])
 def list_suppliers(
     country: str | None = Query(default=None),
     category: str | None = Query(default=None),
-) -> list[Supplier]:
+) -> list[SupplierResponse]:
     suppliers = [
-        Supplier.model_validate(document_to_supplier_payload(document))
+        SupplierResponse.model_validate(document_to_supplier_payload(document))
         for document in get_suppliers_table().all()
     ]
 
@@ -74,13 +74,13 @@ def list_suppliers(
     return suppliers
 
 
-@router.get("/{supplier_id}", response_model=Supplier)
-def get_supplier(supplier_id: int) -> Supplier:
+@router.get("/{supplier_id}", response_model=SupplierResponse)
+def get_supplier(supplier_id: int) -> SupplierResponse:
     return get_supplier_or_404(supplier_id)
 
 
-@router.patch("/{supplier_id}/rate", response_model=Supplier)
-def update_supplier_rate(supplier_id: int, payload: SupplierRateUpdate) -> Supplier:
+@router.patch("/{supplier_id}/rate", response_model=SupplierResponse)
+def update_supplier_rate(supplier_id: int, payload: SupplierRateUpdate) -> SupplierResponse:
     supplier = get_supplier_or_404(supplier_id)
     updated_payload = supplier.model_dump(mode="json")
     updated_payload["rate_per_unit"] = payload.rate_per_unit
@@ -94,11 +94,11 @@ def update_supplier_rate(supplier_id: int, payload: SupplierRateUpdate) -> Suppl
         doc_ids=[supplier_id],
     )
 
-    return Supplier.model_validate(updated_payload)
+    return SupplierResponse.model_validate(updated_payload)
 
 
-@router.patch("/{supplier_id}/status", response_model=Supplier)
-def update_supplier_status(supplier_id: int, payload: SupplierStatusUpdate) -> Supplier:
+@router.patch("/{supplier_id}/status", response_model=SupplierResponse)
+def update_supplier_status(supplier_id: int, payload: SupplierStatusUpdate) -> SupplierResponse:
     supplier = get_supplier_or_404(supplier_id)
     updated_payload = supplier.model_dump(mode="json")
     updated_payload["status"] = payload.status
@@ -112,10 +112,10 @@ def update_supplier_status(supplier_id: int, payload: SupplierStatusUpdate) -> S
         doc_ids=[supplier_id],
     )
 
-    return Supplier.model_validate(updated_payload)
+    return SupplierResponse.model_validate(updated_payload)
 
 
-@router.delete("/{supplier_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{supplier_id}", response_model=None, status_code=status.HTTP_204_NO_CONTENT)
 def delete_supplier(supplier_id: int) -> Response:
     supplier = get_supplier_or_404(supplier_id)
     get_suppliers_table().remove(doc_ids=[supplier.id])

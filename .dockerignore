@@ -14,4 +14,14 @@
 **/*.sqlite*
 services/JWTauth_api/data/
 services/manage_incidentsAPI/incidents.json
-uis/
+uis/*
+!uis/website/
+!uis/website/**
+!uis/backoffices/
+uis/backoffices/*
+!uis/backoffices/portal/
+!uis/backoffices/portal/**
+!uis/start.sh
+uis/**/node_modules
+uis/**/.next
+uis/**/.env*
