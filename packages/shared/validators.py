@@ -12,6 +12,10 @@ def validate_incident_data(data: dict[str, Any]) -> dict[str, str]:
         value = data.get(field)
         if not isinstance(value, str) or not value.strip():
             errors[field] = f"{label} is required"
+        elif field == "title" and len(value.strip()) > 100:
+            errors[field] = "El título no puede superar los 100 caracteres"
+        elif field == "description" and len(value.strip()) > 400:
+            errors[field] = "La descripción no puede superar los 400 caracteres"
 
     for field, allowed, label in (
         ("category", CATEGORIES, "category"),

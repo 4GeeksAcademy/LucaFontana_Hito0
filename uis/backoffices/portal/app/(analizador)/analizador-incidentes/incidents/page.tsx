@@ -11,7 +11,7 @@ export default function IncidentsPage() {
           Analiza el CSV y obtén el resumen operativo en tiempo real.
         </h1>
         <p className="mt-5 max-w-3xl text-lg leading-8 text-white/70">
-          La vista usa el backend FastAPI ubicado en `services/api`, con lógica compartida de validación y consolidación para mantener resultados consistentes entre interfaces.
+          Carga un archivo CSV para revisar un resumen claro de las incidencias y su estado.
         </p>
       </section>
 

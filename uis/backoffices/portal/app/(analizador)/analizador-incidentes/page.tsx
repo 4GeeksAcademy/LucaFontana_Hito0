@@ -9,10 +9,10 @@ export default function Home() {
             Operación interna Brasaland
           </p>
           <h1 className="mt-5 max-w-4xl font-[family-name:var(--font-poppins)] text-5xl font-black leading-[1.05] text-white sm:text-6xl xl:text-7xl">
-            Controla incidencias con reglas consistentes de validación y análisis.
+            Revisa las incidencias y obtén un resumen claro de la operación.
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-8 text-white/70">
-            Este backoffice toma el CSV operativo, ejecuta el análisis en memoria y expone el resultado para revisión visual y exportación sin depender de base de datos.
+            Carga el CSV operativo para revisar los resultados del análisis y descargar un resumen.
           </p>
 
           <div className="mt-10 flex flex-col gap-4 sm:flex-row">
@@ -27,9 +27,9 @@ export default function Home() {
 
         <div className="grid gap-5 sm:grid-cols-2">
           {[
-            ["Validación exacta", "Categorías, estados y reglas de invalidez alineadas con el análisis operativo."],
-            ["Análisis en memoria", "Cada request procesa el CSV sin ORM ni persistencia relacional."],
-            ["Exportación directa", "El último resumen se descarga como CSV con métricas y porcentajes."],
+            ["Revisión de datos", "Consulta las categorías, los estados y los registros que requieren atención."],
+            ["Análisis inmediato", "El archivo se analiza al momento y no se almacena."],
+            ["Descarga del resumen", "Descarga el último resultado en un archivo CSV."],
             ["Lectura operativa", "Métricas generales, categorías, estados y satisfacción en una sola vista."],
           ].map(([title, description]) => (
             <article
@@ -61,7 +61,7 @@ export default function Home() {
             {[
               ["1", "Cargar CSV", "Sube el extracto operativo con el formato validado."],
               ["2", "Revisar inválidos", "Detecta cuántas filas se descartan y por qué regla exacta."],
-              ["3", "Exportar resumen", "Descarga el último análisis con estructura metric,value,percentage."],
+              ["3", "Exportar resumen", "Descarga el último resumen en un archivo CSV."],
             ].map(([step, title, description]) => (
               <div key={step} className="rounded-[1.6rem] border border-white/8 bg-black/20 p-5">
                 <div className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-[#f97316]/12 font-[family-name:var(--font-poppins)] text-lg font-black text-[#fb923c]">

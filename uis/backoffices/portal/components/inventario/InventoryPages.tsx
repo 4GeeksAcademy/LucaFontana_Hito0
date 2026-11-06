@@ -21,9 +21,11 @@ import {
   type Ingredient,
   type InventoryOrder,
 } from "./api";
+import { INVENTORY_LOCATIONS } from "../branchLocations";
 
 const inputClassName =
   "mt-2 h-11 w-full rounded-md border border-white/10 bg-[#1b1b18] px-3 text-sm text-[#f4f1eb] outline-none transition focus:border-[#ed9b54] focus:ring-2 focus:ring-[#ed9b54]/20 disabled:cursor-not-allowed disabled:opacity-50";
+const MAX_ORDER_QUANTITY = 10_000_000;
 const buttonClassName =
   "inline-flex h-11 items-center justify-center gap-2 rounded-md bg-[#e88c45] px-4 text-sm font-bold text-[#17120c] transition hover:bg-[#f2ad70] disabled:cursor-not-allowed disabled:opacity-50";
 
@@ -263,6 +265,10 @@ export function InboundOrderPage() {
     event.preventDefault();
     setError(null);
     setSuccess(null);
+    if (Number(quantity) > MAX_ORDER_QUANTITY) {
+      setError("La cantidad no puede superar los 10 millones.");
+      return;
+    }
     setSubmitting(true);
     try {
       await createInboundOrder({
@@ -320,20 +326,21 @@ export function InboundOrderPage() {
           <div className="grid gap-5 sm:grid-cols-2">
             <label htmlFor="quantity" className="block text-sm font-medium text-white/75">
               Cantidad recibida
-              <input id="quantity" required type="number" min="0" step="any" value={quantity} onChange={(event) => setQuantity(event.target.value)} className={inputClassName} placeholder="0" />
+              <input id="quantity" required type="number" min="0" max={MAX_ORDER_QUANTITY} step="any" value={quantity} onChange={(event) => setQuantity(event.target.value)} className={inputClassName} placeholder="0" aria-describedby={Number(quantity) > MAX_ORDER_QUANTITY ? "inbound-quantity-feedback" : undefined} />
+              {Number(quantity) > MAX_ORDER_QUANTITY ? <span id="inbound-quantity-feedback" className="mt-2 block text-sm text-rose-200" role="alert">La cantidad no puede superar los 10 millones.</span> : null}
             </label>
             <label htmlFor="location" className="block text-sm font-medium text-white/75">
-              Ubicación
+              Sede
               <select id="location" required value={locationId} onChange={(event) => setLocationId(event.target.value)} className={inputClassName}>
-                {Array.from({ length: 14 }, (_, index) => index + 1).map((location) => (
-                  <option key={location} value={location}>Ubicación {location}</option>
+                {INVENTORY_LOCATIONS.map(({ id, label }) => (
+                  <option key={id} value={id}>{label}</option>
                 ))}
               </select>
             </label>
           </div>
           {products.length === 0 && !loading && !productsError ? <p className="text-sm text-amber-100">Primero registra un producto para cargar una entrada.</p> : null}
           <div className="flex justify-end border-t border-white/[0.07] pt-5">
-            <button type="submit" disabled={submitting || loading || products.length === 0} className={buttonClassName}>
+            <button type="submit" disabled={submitting || loading || products.length === 0 || Number(quantity) > MAX_ORDER_QUANTITY} className={buttonClassName}>
               <ArrowDownToLine size={16} aria-hidden="true" />
               {submitting ? "Guardando…" : "Guardar entrada"}
             </button>
@@ -369,6 +376,7 @@ export function OutboundOrderPage() {
   }, []);
 
   const quantityNumber = quantity === "" ? null : Number(quantity);
+  const quantityExceedsLimit = quantityNumber !== null && quantityNumber > MAX_ORDER_QUANTITY;
   const exceedsStock = quantityNumber !== null && availableStock !== null && quantityNumber > availableStock;
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -377,6 +385,10 @@ export function OutboundOrderPage() {
     setSuccess(null);
     if (availableStock === null) {
       setSubmitError("Espera a que se consulte el stock disponible.");
+      return;
+    }
+    if (quantityExceedsLimit) {
+      setSubmitError("La cantidad no puede superar los 10 millones.");
       return;
     }
     if (quantityNumber !== null && quantityNumber > availableStock) {
@@ -462,6 +474,7 @@ export function OutboundOrderPage() {
                 required
                 type="number"
                 min="0"
+                max={MAX_ORDER_QUANTITY}
                 step="any"
                 value={quantity}
                 onChange={(event) => {
@@ -471,10 +484,11 @@ export function OutboundOrderPage() {
                 disabled={!ingredientId || stockLoading || availableStock === null}
                 className={inputClassName}
                 placeholder="0"
-                aria-describedby={exceedsStock || submitError ? "quantity-feedback" : undefined}
+                aria-describedby={quantityExceedsLimit || exceedsStock || submitError ? "quantity-feedback" : undefined}
               />
-              {exceedsStock ? <span id="quantity-feedback" className="mt-2 block text-sm text-amber-100" role="alert">La cantidad supera el stock disponible.</span> : null}
-              {submitError ? <span id="quantity-feedback" className="mt-2 block text-sm text-rose-200" role="alert">{submitError}</span> : null}
+              {quantityExceedsLimit ? <span id="quantity-feedback" className="mt-2 block text-sm text-rose-200" role="alert">La cantidad no puede superar los 10 millones.</span> : null}
+              {!quantityExceedsLimit && exceedsStock ? <span id="quantity-feedback" className="mt-2 block text-sm text-amber-100" role="alert">La cantidad supera el stock disponible.</span> : null}
+              {!quantityExceedsLimit && !exceedsStock && submitError ? <span id="quantity-feedback" className="mt-2 block text-sm text-rose-200" role="alert">{submitError}</span> : null}
             </label>
             <label htmlFor="reason" className="block text-sm font-medium text-white/75">
               Motivo
@@ -485,16 +499,16 @@ export function OutboundOrderPage() {
             </label>
           </div>
           <label htmlFor="location" className="block text-sm font-medium text-white/75 sm:max-w-[calc(50%-0.625rem)]">
-            Ubicación
+            Sede
             <select id="location" required value={locationId} onChange={(event) => setLocationId(event.target.value)} className={inputClassName}>
-              {Array.from({ length: 14 }, (_, index) => index + 1).map((location) => (
-                <option key={location} value={location}>Ubicación {location}</option>
+              {INVENTORY_LOCATIONS.map(({ id, label }) => (
+                <option key={id} value={id}>{label}</option>
               ))}
             </select>
           </label>
           {products.length === 0 && !loading && !productsError ? <p className="text-sm text-amber-100">Primero registra un producto para cargar una salida.</p> : null}
           <div className="flex justify-end border-t border-white/[0.07] pt-5">
-            <button type="submit" disabled={submitting || loading || stockLoading || !ingredientId || availableStock === null || exceedsStock} className={buttonClassName}>
+            <button type="submit" disabled={submitting || loading || stockLoading || !ingredientId || availableStock === null || exceedsStock || quantityExceedsLimit} className={buttonClassName}>
               <ArrowUpFromLine size={16} aria-hidden="true" />
               {submitting ? "Guardando…" : "Guardar salida"}
             </button>

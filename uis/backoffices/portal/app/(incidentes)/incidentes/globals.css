@@ -396,6 +396,25 @@ h3 {
   overflow-wrap: anywhere;
 }
 
+.incident-title-button {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  font: inherit;
+}
+
+.incident-title-button:hover {
+  color: var(--brand-soft);
+}
+
+.incident-title-button:focus-visible,
+.incident-drawer-close:focus-visible {
+  outline: 2px solid var(--brand-soft);
+  outline-offset: 3px;
+}
+
 .incident-main p {
   color: var(--muted);
   font: 0.75rem var(--font-inter), sans-serif;
@@ -469,6 +488,109 @@ h3 {
   gap: 10px;
   color: var(--muted);
   font: 0.8rem var(--font-inter), sans-serif;
+}
+
+.incident-drawer-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  justify-content: flex-end;
+  background: rgba(0, 0, 0, 0.62);
+}
+
+.incident-drawer-backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  border: 0;
+  background: transparent;
+}
+
+.incident-drawer {
+  position: relative;
+  z-index: 1;
+  width: min(480px, 100%);
+  height: 100%;
+  overflow-y: auto;
+  padding: 28px;
+  border-left: 1px solid var(--line);
+  background: #141414;
+  box-shadow: -24px 0 70px rgba(0, 0, 0, 0.45);
+}
+
+.incident-drawer-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.incident-drawer-header .eyebrow {
+  margin: 8px 0 0;
+}
+
+.incident-drawer-close {
+  display: inline-flex;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface-strong);
+  color: var(--foreground);
+}
+
+.incident-drawer h2 {
+  overflow-wrap: anywhere;
+  font-size: 1.65rem;
+}
+
+.incident-drawer-id {
+  margin-top: 8px;
+  color: var(--muted);
+  font: 0.75rem var(--font-inter), sans-serif;
+  overflow-wrap: anywhere;
+}
+
+.incident-drawer-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 28px 0;
+  padding: 20px 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.incident-drawer-meta dt {
+  color: var(--muted);
+  font: 700 0.65rem var(--font-inter), sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.incident-drawer-meta dd {
+  margin: 6px 0 0;
+  color: var(--foreground);
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+}
+
+.incident-drawer-description h3 {
+  margin-bottom: 10px;
+  color: var(--brand-soft);
+}
+
+.incident-drawer-description p {
+  color: #d4d4d8;
+  font-size: 0.95rem;
+  line-height: 1.75;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
 }
 
 .state strong {
@@ -569,5 +691,13 @@ h3 {
   .status-select {
     max-width: none;
     align-self: flex-end;
+  }
+
+  .incident-drawer {
+    padding: 22px 18px;
+  }
+
+  .incident-drawer-meta {
+    gap: 14px 10px;
   }
 }

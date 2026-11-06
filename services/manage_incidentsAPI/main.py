@@ -25,6 +25,7 @@ from services.manage_incidentsAPI.schemas import (
     HealthResponse,
     IncidentCreateRequest,
     IncidentCreatedResponse,
+    IncidentDeletedResponse,
     IncidentResponse,
     IncidentStatusResponse,
     IncidentStatusUpdateRequest,
@@ -148,6 +149,21 @@ def get_incident(incident_id: str) -> IncidentResponse | JSONResponse:
     if incident is None:
         return JSONResponse(status_code=404, content={"detail": "Incident not found"})
     return IncidentResponse.model_validate(incident)
+
+
+@router.delete(
+    "/api/incidents/{incident_id}",
+    response_model=IncidentDeletedResponse,
+    responses={404: {"model": ErrorResponse}},
+)
+def delete_incident(incident_id: str) -> IncidentDeletedResponse | JSONResponse:
+    table = get_db().table("incidents")
+    incident = next((item for item in table.all() if item.get("id") == incident_id), None)
+    if incident is None:
+        return JSONResponse(status_code=404, content={"detail": "Incident not found"})
+
+    table.remove(TinyQuery().id == incident_id)
+    return IncidentDeletedResponse(id=incident_id, message="Incidente eliminado correctamente.")
 
 
 @router.patch(

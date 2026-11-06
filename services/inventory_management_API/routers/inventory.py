@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, func, select
 
 if __package__ and __package__.startswith("services.inventory_management_API"):
@@ -86,10 +87,24 @@ def create_product(
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user),
 ):
+    duplicate = db.exec(select(Ingredient).where(Ingredient.sku == payload.sku)).first()
+    if duplicate:
+        raise HTTPException(
+            status_code=409,
+            detail="Ya existe un producto con ese SKU. Ingresa uno diferente.",
+        )
+
     product = Ingredient(**payload.model_dump())
 
-    db.add(product)
-    db.commit()
+    try:
+        db.add(product)
+        db.commit()
+    except IntegrityError as error:
+        db.rollback()
+        raise HTTPException(
+            status_code=409,
+            detail="Ya existe un producto con ese SKU. Ingresa uno diferente.",
+        ) from error
     db.refresh(product)
 
     return IngredientResponse(

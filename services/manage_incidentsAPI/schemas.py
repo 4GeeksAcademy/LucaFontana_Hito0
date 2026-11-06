@@ -34,6 +34,11 @@ class IncidentStatusResponse(BaseModel):
     status: str
 
 
+class IncidentDeletedResponse(BaseModel):
+    id: str
+    message: str
+
+
 class IncidentResponse(BaseModel):
     id: str
     title: str

@@ -113,7 +113,7 @@ export function CandidateProvider({ children }: { children: ReactNode }) {
   const createCandidate = async (values: CandidateFormValues): Promise<MutationResult> => {
     setCreateState({ status: "loading", message: "Creando candidatura..." });
 
-    const clientId = crypto.randomUUID();
+    const clientId = createUuid();
     const appliedAt = new Date().toISOString();
     const payload = {
       id: clientId,
@@ -300,7 +300,7 @@ export function CandidateProvider({ children }: { children: ReactNode }) {
       });
       const data = await parseResponse<Partial<CandidateNote>>(response);
       const note: CandidateNote = {
-        id: data?.id ?? crypto.randomUUID(),
+        id: data?.id ?? createUuid(),
         record_id: data?.record_id ?? id,
         content: data?.content ?? content,
         created_at: data?.created_at ?? new Date().toISOString(),
@@ -486,7 +486,7 @@ async function parseResponse<T>(response: Response, allowEmpty = false): Promise
 
 function normalizeRecordSummary(record: Partial<CandidateRecordSummary>): CandidateRecordSummary {
   return {
-    id: record.id ?? crypto.randomUUID(),
+    id: record.id ?? createUuid(),
     full_name: record.full_name ?? "Sin nombre",
     email: record.email ?? "",
     phone: record.phone ?? "",
@@ -524,4 +524,25 @@ function upsertSummary(current: CandidateRecordSummary[], summary: CandidateReco
 
 function getErrorMessage(error: unknown, fallback: string) {
   return error instanceof Error ? error.message : fallback;
+}
+
+function createUuid() {
+  const cryptoApi = globalThis.crypto;
+  if (typeof cryptoApi?.randomUUID === "function") {
+    return cryptoApi.randomUUID();
+  }
+
+  const bytes = new Uint8Array(16);
+  if (cryptoApi?.getRandomValues) {
+    cryptoApi.getRandomValues(bytes);
+  } else {
+    bytes.forEach((_, index) => {
+      bytes[index] = Math.floor(Math.random() * 256);
+    });
+  }
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+
+  const hex = Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0"));
+  return `${hex.slice(0, 4).join("")}-${hex.slice(4, 6).join("")}-${hex.slice(6, 8).join("")}-${hex.slice(8, 10).join("")}-${hex.slice(10).join("")}`;
 }

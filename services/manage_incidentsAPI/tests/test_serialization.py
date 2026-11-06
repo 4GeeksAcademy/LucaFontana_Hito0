@@ -44,7 +44,7 @@ def seed_incident(client, **updates):
 def test_every_incident_route_has_an_explicit_response_model():
     routes = [route for route in main.app.routes if isinstance(route, APIRoute)]
 
-    assert len(routes) == 6
+    assert len(routes) == 7
     assert all(route.response_model is not None for route in routes)
 
 

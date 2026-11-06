@@ -24,14 +24,14 @@ class IngredientResponse(BaseModel):
 
 class IngredientEntryCreate(BaseModel):
     ingredient_id: int
-    quantity: float = Field(ge=0)
+    quantity: float = Field(ge=0, le=10_000_000)
     supplier_name: str
     location_id: int
 
 
 class IngredientExitCreate(BaseModel):
     ingredient_id: int
-    quantity: float = Field(ge=0)
+    quantity: float = Field(ge=0, le=10_000_000)
     reason: str
     location_id: int
 

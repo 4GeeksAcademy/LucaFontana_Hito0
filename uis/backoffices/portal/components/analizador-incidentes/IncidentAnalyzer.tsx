@@ -260,10 +260,10 @@ export function IncidentAnalyzer() {
               Resultado exportable
             </p>
             <h3 className="mt-3 font-[family-name:var(--font-poppins)] text-2xl font-bold text-white">
-              Último análisis en memoria
+              Último resumen procesado
             </h3>
             <p className="mt-4 text-sm leading-7 text-white/65">
-              El backend conserva únicamente el último resumen procesado en la instancia actual para descargarlo como CSV.
+              La aplicación guarda temporalmente el último resumen procesado para que puedas descargarlo como CSV.
             </p>
           </div>
 
@@ -285,10 +285,6 @@ export function IncidentAnalyzer() {
             </div>
           ) : null}
 
-          <div className="rounded-[1.5rem] border border-white/8 bg-black/20 p-5">
-            <p className="text-sm font-semibold text-white">Base URL configurada</p>
-            <p className="mt-2 break-all text-sm text-white/55">Rutas relativas del mismo dominio del frontend</p>
-          </div>
         </aside>
       </section>
 
