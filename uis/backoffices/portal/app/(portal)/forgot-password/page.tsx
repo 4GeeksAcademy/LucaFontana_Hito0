@@ -10,6 +10,7 @@ const api = createAuthApiClient(getAuthApiBaseUrl(), () => undefined);
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
+  const isEmailValid = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim());
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -45,7 +46,7 @@ export default function ForgotPasswordPage() {
             <input id="email" type="email" required autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/40" />
           </label>
           {error ? <p className="text-sm font-medium text-red-400" role="alert">{error}</p> : null}
-          <button type="submit" disabled={isSubmitting} className="rounded-full bg-[var(--brand)] px-6 py-3 text-base font-bold text-white transition hover:bg-[var(--brand-dark)] disabled:cursor-not-allowed disabled:opacity-60">
+          <button type="submit" disabled={isSubmitting || !isEmailValid} className="rounded-full bg-[var(--brand)] px-6 py-3 text-base font-bold text-white transition hover:bg-[var(--brand-dark)] disabled:cursor-not-allowed disabled:opacity-60">
             {isSubmitting ? "Enviando…" : "Enviar enlace"}
           </button>
         </form>

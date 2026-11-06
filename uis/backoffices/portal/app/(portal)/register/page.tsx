@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
+import { PasswordInput } from "@/components/PasswordInput";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function RegisterPage() {
@@ -51,7 +52,7 @@ export default function RegisterPage() {
         </label>
         <label className="flex flex-col gap-2 text-sm font-medium text-white/80" htmlFor="password">
           Contraseña
-          <input id="password" type="password" required autoComplete="new-password" value={form.password} onChange={(event) => updateField("password", event.target.value)} className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/40" />
+          <PasswordInput id="password" autoComplete="new-password" value={form.password} onChange={(value) => updateField("password", value)} className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/40" />
         </label>
         <label className="flex flex-col gap-2 text-sm font-medium text-white/80" htmlFor="name">
           Nombre (opcional)

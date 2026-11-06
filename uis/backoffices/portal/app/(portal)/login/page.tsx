@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
+import { PasswordInput } from "@/components/PasswordInput";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function LoginPage() {
@@ -59,13 +60,11 @@ export default function LoginPage() {
         </div>
         <div className="flex flex-col gap-2">
           <label htmlFor="password" className="text-sm font-medium text-white/80">Contraseña</label>
-          <input
+          <PasswordInput
             id="password"
-            type="password"
-            required
             autoComplete="current-password"
             value={password}
-            onChange={(event) => setPassword(event.target.value)}
+            onChange={setPassword}
             className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/40"
           />
         </div>

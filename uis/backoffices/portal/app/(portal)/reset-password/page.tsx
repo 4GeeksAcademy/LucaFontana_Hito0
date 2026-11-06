@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
+import { PasswordInput } from "@/components/PasswordInput";
 import { createAuthApiClient } from "@shared/auth";
 import { getAuthApiBaseUrl } from "@/lib/authApi";
 
@@ -49,11 +50,11 @@ export default function ResetPasswordPage() {
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">
         <label className="flex flex-col gap-2 text-sm font-medium text-white/80" htmlFor="password">
           Nueva contraseña
-          <input id="password" type="password" required minLength={8} autoComplete="new-password" value={password} onChange={(event) => setPassword(event.target.value)} className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/40" />
+          <PasswordInput id="password" minLength={8} autoComplete="new-password" value={password} onChange={setPassword} className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/40" />
         </label>
         <label className="flex flex-col gap-2 text-sm font-medium text-white/80" htmlFor="confirmation">
           Confirmar contraseña
-          <input id="confirmation" type="password" required minLength={8} autoComplete="new-password" value={confirmation} onChange={(event) => setConfirmation(event.target.value)} className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/40" />
+          <PasswordInput id="confirmation" minLength={8} autoComplete="new-password" value={confirmation} onChange={setConfirmation} className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/40" />
         </label>
         {error ? <p className="text-sm font-medium text-red-400" role="alert">{error}</p> : null}
         <button type="submit" disabled={isSubmitting || !token} className="rounded-full bg-[var(--brand)] px-6 py-3 text-base font-bold text-white transition hover:bg-[var(--brand-dark)] disabled:cursor-not-allowed disabled:opacity-60">

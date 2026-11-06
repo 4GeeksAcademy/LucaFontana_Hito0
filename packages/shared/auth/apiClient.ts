@@ -135,7 +135,12 @@ export function createAuthApiClient(baseUrl: string, onUnauthorized: () => void)
   async function forgotPassword(email: string): Promise<void> {
     const response = await request(
       "/auth/forgot-password",
-      { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email }) },
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+        signal: AbortSignal.timeout(15_000),
+      },
       false,
     );
     if (!response.ok) {
